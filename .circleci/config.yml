@@ -1,0 +1,142 @@
+version: 2.1
+
+executors:
+  jdk:
+    docker:
+      - image: openjdk:8-jdk-slim
+    environment:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false
+
+commands:
+  with_cache:
+    parameters:
+      steps:
+        type: steps
+    steps:
+      - restore_cache:
+          keys:
+            - v1-{{ checksum "build.gradle.kts" }}-{{ checksum "buildSrc/src/main/kotlin/Plugin.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Lib.kt" }}
+            - v1-{{ checksum "build.gradle.kts" }}-{{ checksum "buildSrc/src/main/kotlin/Plugin.kt" }}
+            - v1-{{ checksum "build.gradle.kts" }}
+            - v1-
+      - steps: << parameters.steps >>
+
+jobs:
+  build_cache:
+    executor: jdk
+    steps:
+      - checkout
+      - with_cache:
+          steps:
+            - run:
+               command: ./gradlew dependencies
+            - save_cache:
+                key: v1-{{ checksum "build.gradle.kts" }}-{{ checksum "buildSrc/src/main/kotlin/Plugin.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Lib.kt" }}
+                paths:
+                  - ~/.gradle
+
+  check_root:
+    executor: jdk
+    steps:
+      - checkout
+      - with_cache:
+          steps:
+            - run:
+                command: ./gradlew :check
+                name: Running tests
+            - store_test_results:
+                path: build/test-results
+            - store_artifacts:
+                path: build/reports
+
+  check:
+    executor: jdk
+    parameters:
+      project:
+        type: string
+    steps:
+      - checkout
+      - with_cache:
+          steps:
+            - run:
+                command: ./gradlew check
+                name: Running tests
+            - store_test_results:
+                path: build/test-results
+            - store_artifacts:
+                path: build/reports
+
+  build:
+    executor: jdk
+    parameters:
+      project:
+        type: string
+    steps:
+      - checkout
+      - with_cache:
+          steps:
+            - run:
+                command: ./gradlew :musicbot-<< parameters.project >>:shadowJar
+                name: Building jars
+            - run:
+                command: mkdir build/libs
+                name: Creating lib dir
+            - run:
+                command: mv musicbot-<< parameters.project >>/build/libs/musicbot-<< parameters.project >>-*.jar build/libs/musicbot-<< parameters.project >>.jar
+                name: Renaming jar
+            - store_artifacts:
+                path: build/libs
+                destination: dist
+
+workflows:
+  full_workflow:
+    jobs:
+      - build_cache
+      - check_root:
+          requires:
+            - build_cache
+      - check:
+          name: check_mp3provider
+          project: mp3provider
+          requires:
+            - build_cache
+      - check:
+          name: check_mpv
+          project: mpv
+          requires:
+            - build_cache
+      - check:
+          name: check_spotify
+          project: spotify
+          requires:
+            - build_cache
+      - check:
+          name: check_sysvolume
+          project: sysvolume
+          requires:
+            - build_cache
+      - check:
+          name: check_youtube
+          project: youtube
+          requires:
+            - build_cache
+      - build:
+          project: mp3provider
+          requires:
+            - check_mp3provider
+      - build:
+          project: mpv
+          requires:
+            - check_mpv
+      - build:
+          project: spotify
+          requires:
+            - check_spotify
+      - build:
+          project: sysvolume
+          requires:
+            - check_sysvolume
+      - build:
+          project: youtube
+          requires:
+            - check_youtube

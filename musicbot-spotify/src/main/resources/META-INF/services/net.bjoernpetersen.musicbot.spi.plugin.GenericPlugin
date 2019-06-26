@@ -1,0 +1,3 @@
+net.bjoernpetersen.spotify.auth.SpotifyAuthenticatorImpl
+net.bjoernpetersen.spotify.control.SpotifyControlImpl
+net.bjoernpetersen.spotify.volume.SpotifyVolumeHandler
