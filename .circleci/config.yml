@@ -70,9 +70,9 @@ jobs:
                 command: ./gradlew :musicbot-<< parameters.project >>:check
                 name: Running tests
             - store_test_results:
-                path: << parameters.project >>/build/test-results
+                path: musicbot-<< parameters.project >>/build/test-results
             - store_artifacts:
-                path: << parameters.project >>/build/reports
+                path: musicbot-<< parameters.project >>/build/reports
 
   build:
     executor: << parameters.executor >>
