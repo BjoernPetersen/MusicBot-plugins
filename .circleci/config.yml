@@ -92,9 +92,6 @@ workflows:
   full_workflow:
     jobs:
       - build_cache
-      - check_root:
-          requires:
-            - build_cache
       - check:
           name: check_javafxplayback
           project: javafxplayback
@@ -123,6 +120,9 @@ workflows:
       - check:
           name: check_youtube
           project: youtube
+          requires:
+            - build_cache
+      - check_root:
           requires:
             - build_cache
       - build:
