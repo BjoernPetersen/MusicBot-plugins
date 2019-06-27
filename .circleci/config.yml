@@ -122,21 +122,26 @@ workflows:
             - build_cache
       - build:
           project: mp3provider
+          name: build_mp3provider
           requires:
             - check_mp3provider
       - build:
           project: mpv
+          name: build_mpv
           requires:
             - check_mpv
       - build:
           project: spotify
+          name: build_spotify
           requires:
             - check_spotify
       - build:
           project: sysvolume
+          name: build_sysvolume
           requires:
             - check_sysvolume
       - build:
           project: youtube
+          name: build_youtube
           requires:
             - check_youtube
