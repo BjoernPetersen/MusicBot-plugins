@@ -1,4 +1,5 @@
 include(
+    "musicbot-javafxplayback",
     "musicbot-mp3provider",
     "musicbot-mpv",
     "musicbot-spotify",

@@ -96,6 +96,11 @@ workflows:
           requires:
             - build_cache
       - check:
+          name: check_javafxplayback
+          project: javafxplayback
+          requires:
+            - build_cache
+      - check:
           name: check_mp3provider
           project: mp3provider
           requires:
@@ -120,6 +125,11 @@ workflows:
           project: youtube
           requires:
             - build_cache
+      - build:
+          project: javafxplayback
+          name: build_javafxplayback
+          requires:
+            - check_javafxplayback
       - build:
           project: mp3provider
           name: build_mp3provider
