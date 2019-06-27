@@ -6,6 +6,11 @@ executors:
       - image: openjdk:8-jdk-slim
     environment:
       GRADLE_OPTS: -Dorg.gradle.daemon=false
+  jfx:
+    docker:
+      - image: yannishuber/openjfx8:latest
+    environment:
+      GRADLE_OPTS: -Dorg.gradle.daemon=false
 
 commands:
   with_cache:
@@ -50,8 +55,11 @@ jobs:
                 path: build/reports
 
   check:
-    executor: jdk
+    executor: << parameters.executor >>
     parameters:
+      executor:
+        type: executor
+        default: jdk
       project:
         type: string
     steps:
@@ -67,8 +75,11 @@ jobs:
                 path: << parameters.project >>/build/reports
 
   build:
-    executor: jdk
+    executor: << parameters.executor >>
     parameters:
+      executor:
+        type: executor
+        default: jdk
       project:
         type: string
     steps:
@@ -95,6 +106,7 @@ workflows:
       - check:
           name: check_javafxplayback
           project: javafxplayback
+          executor: jfx
           requires:
             - build_cache
       - check:
@@ -128,6 +140,7 @@ workflows:
       - build:
           project: javafxplayback
           name: build_javafxplayback
+          executor: jfx
           requires:
             - check_javafxplayback
       - build:
