@@ -59,12 +59,12 @@ jobs:
       - with_cache:
           steps:
             - run:
-                command: ./gradlew check
+                command: ./gradlew :musicbot-<< parameters.project >>:check
                 name: Running tests
             - store_test_results:
-                path: build/test-results
+                path: << parameters.project >>/build/test-results
             - store_artifacts:
-                path: build/reports
+                path: << parameters.project >>/build/reports
 
   build:
     executor: jdk
