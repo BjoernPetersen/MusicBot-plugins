@@ -1,3 +1,4 @@
+rootProject.name = "musicbot-plugins"
 include(
     "musicbot-javafxplayback",
     "musicbot-mp3provider",
