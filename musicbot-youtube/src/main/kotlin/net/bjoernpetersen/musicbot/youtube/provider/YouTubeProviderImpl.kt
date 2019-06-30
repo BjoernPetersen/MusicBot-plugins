@@ -18,7 +18,9 @@ import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.PasswordBox
+import net.bjoernpetersen.musicbot.api.player.ExperimentalSongDsl
 import net.bjoernpetersen.musicbot.api.player.Song
+import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
@@ -117,7 +119,10 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
 
             try {
                 withContext(coroutineContext) {
-                    for (partition: List<IndexedValue<String>> in Lists.partition(toBeLookedUp, 50)) {
+                    for (partition: List<IndexedValue<String>> in Lists.partition(
+                        toBeLookedUp,
+                        50
+                    )) {
                         val idsString = partition.joinToString(",") { pair -> pair.value }
 
                         val videos: List<Video> = api.videos().list(VIDEO_RESULT_PARTS)
@@ -150,17 +155,16 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
         }
     }
 
+    @UseExperimental(ExperimentalSongDsl::class)
     private fun createSong(video: Video): Song {
         val snippet = video.snippet
         val medium = snippet.thumbnails.medium
-        return Song(
-            provider = this,
-            id = video.id,
-            title = snippet.title,
-            description = snippet.description,
-            duration = getDuration(video.contentDetails.duration),
-            albumArtUrl = medium?.url
-        )
+        return song(video.id) {
+            title = snippet.title
+            description = snippet.description
+            duration = getDuration(video.contentDetails.duration)
+            medium?.url?.let(::serveRemoteImage)
+        }
     }
 
     private fun getDuration(encodedDuration: String): Int {
