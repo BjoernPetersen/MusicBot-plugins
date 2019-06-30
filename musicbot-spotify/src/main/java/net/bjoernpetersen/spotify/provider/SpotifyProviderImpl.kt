@@ -16,7 +16,9 @@ import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.cache.AsyncLoader
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.loader.NoResource
+import net.bjoernpetersen.musicbot.api.player.ExperimentalSongDsl
 import net.bjoernpetersen.musicbot.api.player.Song
+import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
@@ -78,21 +80,18 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
         job.cancel()
     }
 
+    @UseExperimental(ExperimentalSongDsl::class)
     private fun createSong(
         id: String,
         title: String,
         description: String,
         durationMs: Int,
         albumArtUrl: String?
-    ): Song {
-        return Song(
-            id = id,
-            provider = this,
-            title = title,
-            description = description,
-            duration = durationMs / 1000,
-            albumArtUrl = albumArtUrl
-        )
+    ): Song = song(id) {
+        this.title = title
+        this.description = description
+        duration = durationMs / 1000
+        if (albumArtUrl != null) serveRemoteImage(albumArtUrl)
     }
 
     override suspend fun search(query: String, offset: Int): List<Song> {
