@@ -1,11 +1,7 @@
 package net.bjoernpetersen.localmp3.provider
 
 import com.mpatric.mp3agic.BaseException
-import com.mpatric.mp3agic.ID3v2
 import com.mpatric.mp3agic.Mp3File
-import io.ktor.util.KtorExperimentalAPI
-import io.ktor.util.error
-import io.ktor.util.extension
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -14,15 +10,17 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
-import net.bjoernpetersen.musicbot.api.config.ChoiceBox
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.PathChooser
 import net.bjoernpetersen.musicbot.api.config.PathSerializer
 import net.bjoernpetersen.musicbot.api.config.TextBox
 import net.bjoernpetersen.musicbot.api.loader.NoResource
 import net.bjoernpetersen.musicbot.api.loader.SongLoadingException
+import net.bjoernpetersen.musicbot.api.player.ExperimentalSongDsl
 import net.bjoernpetersen.musicbot.api.player.Song
+import net.bjoernpetersen.musicbot.api.player.song
+import net.bjoernpetersen.musicbot.spi.image.AlbumArtSupplier
+import net.bjoernpetersen.musicbot.spi.image.ImageData
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
@@ -30,7 +28,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3PlaybackFactory
 import java.io.IOException
-import java.net.NetworkInterface
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
@@ -40,8 +37,7 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.streams.asSequence
 
-@KtorExperimentalAPI
-class Mp3ProviderImpl : Mp3Provider, CoroutineScope {
+class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.IO + job
@@ -60,9 +56,6 @@ class Mp3ProviderImpl : Mp3Provider, CoroutineScope {
     override val description = "MP3s from some local directory"
     override val subject
         get() = customSubject?.get() ?: folder?.get()?.fileName?.toString() ?: name
-
-    private lateinit var albumArtHost: Config.SerializedEntry<NetworkInterface>
-    private lateinit var albumArtServer: AlbumArtServer
 
     private fun checkFolder(path: Path?): String? {
         if (path == null) return "Required"
@@ -92,17 +85,7 @@ class Mp3ProviderImpl : Mp3Provider, CoroutineScope {
             TextBox
         )
 
-        albumArtHost = config.SerializedEntry(
-            "network interface",
-            "The network interface to server album arts on",
-            NetworkInterfaceSerializer,
-            NonnullConfigChecker,
-            ChoiceBox({ "${it.displayName} (${it.name})" }, lazy = true, refresh = {
-                findNetworkInterfaces()
-            })
-        )
-
-        return listOf(folder!!, recursive, customSubject!!, albumArtHost)
+        return listOf(folder!!, recursive, customSubject!!)
     }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
@@ -112,12 +95,6 @@ class Mp3ProviderImpl : Mp3Provider, CoroutineScope {
         initStateWriter.state("Initializing...")
         val folder = folder?.get() ?: throw InitializationException()
         withContext(coroutineContext) {
-            initStateWriter.state("Starting album art server")
-            albumArtServer = AlbumArtServer(folder)
-            val host = findHost(albumArtHost.get())
-                ?: throw InitializationException("Could not find any valid IP address")
-            albumArtServer.start(host)
-
             initStateWriter.state("Looking for songs...")
             val start = Instant.now()
             songById = initializeSongs(initStateWriter, folder, recursive.get())
@@ -162,16 +139,22 @@ class Mp3ProviderImpl : Mp3Provider, CoroutineScope {
         }
     }
 
+    override fun getAlbumArt(songId: String): ImageData? {
+        val path = songId.toPath()
+        return loadImage(folder!!.get()!!, path)
+    }
+
+    @UseExperimental(ExperimentalSongDsl::class)
     private suspend fun createSong(path: Path): Song? {
         return withContext(coroutineContext) {
             try {
                 val mp3 = try {
                     Mp3File(path)
                 } catch (e: IOException) {
-                    logger.error(e)
+                    logger.error(e) { e.message ?: "Exception of type ${e::class.java.name}" }
                     return@withContext null
                 } catch (e: BaseException) {
-                    logger.error(e)
+                    logger.error(e) { e.message ?: "Exception of type ${e::class.java.name}" }
                     return@withContext null
                 }
 
@@ -181,19 +164,12 @@ class Mp3ProviderImpl : Mp3Provider, CoroutineScope {
                     else -> return@withContext null
                 }
 
-                val id = path.toId()
-                val albumArtUrl = if (id3 is ID3v2 && id3.albumImage != null) {
-                    albumArtServer.getUrl(id)
-                } else null
-
-                Song(
-                    id = id,
-                    title = id3.title,
-                    description = id3.artist ?: "",
-                    duration = mp3.lengthInSeconds.toInt(),
-                    provider = this@Mp3ProviderImpl,
-                    albumArtUrl = albumArtUrl
-                )
+                song(path.toId()) {
+                    title = id3.title
+                    description = id3.artist ?: ""
+                    duration = mp3.lengthInSeconds.toInt()
+                    serveLocalImage()
+                }
             } catch (e: Exception) {
                 null
             }
@@ -201,7 +177,6 @@ class Mp3ProviderImpl : Mp3Provider, CoroutineScope {
     }
 
     override suspend fun close() {
-        albumArtServer.close()
         job.cancel()
     }
 
@@ -215,7 +190,7 @@ class Mp3ProviderImpl : Mp3Provider, CoroutineScope {
         return songById.values.filter {
             queryParts.any { query ->
                 it.title.toLowerCase().contains(query) ||
-                        it.description.toLowerCase().contains(query)
+                    it.description.toLowerCase().contains(query)
             }
         }
     }
