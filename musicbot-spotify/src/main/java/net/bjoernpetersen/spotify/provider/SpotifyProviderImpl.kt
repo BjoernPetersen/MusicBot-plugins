@@ -16,7 +16,6 @@ import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.cache.AsyncLoader
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.loader.NoResource
-import net.bjoernpetersen.musicbot.api.player.ExperimentalSongDsl
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.spi.loader.Resource
@@ -80,7 +79,6 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
         job.cancel()
     }
 
-    @UseExperimental(ExperimentalSongDsl::class)
     private fun createSong(
         id: String,
         title: String,

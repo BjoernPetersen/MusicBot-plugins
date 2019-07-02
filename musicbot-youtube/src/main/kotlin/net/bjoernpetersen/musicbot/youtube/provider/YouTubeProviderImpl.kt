@@ -18,7 +18,6 @@ import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.PasswordBox
-import net.bjoernpetersen.musicbot.api.player.ExperimentalSongDsl
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.spi.loader.Resource
@@ -155,7 +154,6 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
         }
     }
 
-    @UseExperimental(ExperimentalSongDsl::class)
     private fun createSong(video: Video): Song {
         val snippet = video.snippet
         val medium = snippet.thumbnails.medium

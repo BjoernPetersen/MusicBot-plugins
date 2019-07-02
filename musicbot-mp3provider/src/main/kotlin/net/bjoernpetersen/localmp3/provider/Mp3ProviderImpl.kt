@@ -16,7 +16,6 @@ import net.bjoernpetersen.musicbot.api.config.PathSerializer
 import net.bjoernpetersen.musicbot.api.config.TextBox
 import net.bjoernpetersen.musicbot.api.loader.NoResource
 import net.bjoernpetersen.musicbot.api.loader.SongLoadingException
-import net.bjoernpetersen.musicbot.api.player.ExperimentalSongDsl
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.spi.image.AlbumArtSupplier
@@ -144,7 +143,6 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
         return loadImage(folder!!.get()!!, path)
     }
 
-    @UseExperimental(ExperimentalSongDsl::class)
     private suspend fun createSong(path: Path): Song? {
         return withContext(coroutineContext) {
             try {
