@@ -3,7 +3,7 @@ package net.bjoernpetersen.spotify.suggester
 import com.wrapper.spotify.SpotifyApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.ChoiceBox
@@ -11,6 +11,7 @@ import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.plugin.IdBase
+import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
@@ -21,16 +22,11 @@ import java.io.IOException
 import java.util.Collections
 import java.util.LinkedList
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 @IdBase("Spotify playlist")
-class PlaylistSuggester : Suggester, CoroutineScope {
+class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.IO) {
 
     private val logger = KotlinLogging.logger {}
-
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
 
     private lateinit var userId: Config.StringEntry
     private lateinit var playlistId: Config.SerializedEntry<PlaylistChoice>
@@ -116,7 +112,7 @@ class PlaylistSuggester : Suggester, CoroutineScope {
         playlistId = config.SerializedEntry(
             "playlist",
             "One of your public playlists to play",
-            PlaylistChoice.Serializer,
+            PlaylistChoice,
             NonnullConfigChecker,
             ChoiceBox(PlaylistChoice::displayName, { findPlaylists() }, true)
         )
@@ -199,9 +195,13 @@ class PlaylistSuggester : Suggester, CoroutineScope {
         else result + loadPlaylist(playlistId, offset + playlistTracks.items.size)
     }
 
+    private fun cancelScope() {
+        cancel()
+    }
+
     @Throws(IOException::class)
     override suspend fun close() {
-        job.cancel()
+        cancelScope()
         nextSongs.clear()
     }
 }
