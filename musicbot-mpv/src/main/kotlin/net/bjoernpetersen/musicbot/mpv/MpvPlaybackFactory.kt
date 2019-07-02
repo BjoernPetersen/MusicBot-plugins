@@ -8,9 +8,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -27,14 +27,20 @@ import net.bjoernpetersen.musicbot.api.config.IntSerializer
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.NumberBox
 import net.bjoernpetersen.musicbot.api.plugin.IdBase
+import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AacPlabackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.AviPlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.ExperimentalVideoFilePlayback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.FlacPlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.MkvPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3PlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp4PlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WavePlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.WmvPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.util.FileStorage
 import net.bjoernpetersen.musicbot.youtube.playback.YouTubePlaybackFactory
 import net.bjoernpetersen.musicbot.youtube.playback.YouTubeResource
@@ -46,10 +52,10 @@ import java.nio.CharBuffer
 import java.time.Duration
 import java.util.LinkedList
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 private const val EXECUTABLE = "mpv"
 
+@UseExperimental(ExperimentalVideoFilePlayback::class)
 @IdBase("mpv")
 class MpvPlaybackFactory :
     AacPlabackFactory,
@@ -57,16 +63,16 @@ class MpvPlaybackFactory :
     Mp3PlaybackFactory,
     WavePlaybackFactory,
     YouTubePlaybackFactory,
-    CoroutineScope {
+    AviPlaybackFactory,
+    MkvPlaybackFactory,
+    Mp4PlaybackFactory,
+    WmvPlaybackFactory,
+    CoroutineScope by PluginScope(Dispatchers.IO) {
 
     override val name: String = "mpv"
     override val description: String = "Plays various files using mpv"
 
     private val logger = KotlinLogging.logger { }
-
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
 
     private lateinit var noVideo: Config.BooleanEntry
     private lateinit var fullscreen: Config.BooleanEntry
@@ -166,8 +172,12 @@ class MpvPlaybackFactory :
         }
     }
 
+    private fun cancelScope() {
+        cancel()
+    }
+
     override suspend fun close() {
-        job.cancel()
+        cancelScope()
     }
 }
 
