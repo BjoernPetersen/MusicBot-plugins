@@ -3,6 +3,7 @@ package net.bjoernpetersen.spotify.playback
 import com.google.gson.JsonArray
 import com.wrapper.spotify.SpotifyApi
 import com.wrapper.spotify.exceptions.detailed.BadGatewayException
+import com.wrapper.spotify.exceptions.detailed.NotFoundException
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.time.delay
@@ -82,7 +83,7 @@ internal class SpotifyPlayback(
                 .execute()
         } catch (e: Exception) {
             logger.error(e) { "Could not check state" }
-            if (e !is BadGatewayException) {
+            if (e !is BadGatewayException && e !is NotFoundException) {
                 feedbackChannel.updateState(PlaybackState.BROKEN)
             }
             return
