@@ -4,8 +4,7 @@ import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
 import net.bjoernpetersen.musicbot.api.config.SerializationException
 
 internal data class PlaylistChoice(val id: String, val displayName: String) {
-
-    object Serializer : ConfigSerializer<PlaylistChoice> {
+    companion object : ConfigSerializer<PlaylistChoice> {
         @Throws(SerializationException::class)
         override fun deserialize(string: String): PlaylistChoice {
             string.split(';').let {
