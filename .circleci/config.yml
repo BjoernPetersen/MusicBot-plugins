@@ -130,6 +130,11 @@ workflows:
           requires:
             - build_cache
       - check:
+          name: check_videoprovider
+          project: videoprovider
+          requires:
+            - build_cache
+      - check:
           name: check_youtube
           project: youtube
           requires:
@@ -163,6 +168,11 @@ workflows:
           name: build_sysvolume
           requires:
             - check_sysvolume
+      - build:
+          project: videoprovider
+          name: build_videoprovider
+          requires:
+            - check_videoprovider
       - build:
           project: youtube
           name: build_youtube

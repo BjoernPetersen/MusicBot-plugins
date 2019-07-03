@@ -5,5 +5,6 @@ include(
     "musicbot-mpv",
     "musicbot-spotify",
     "musicbot-sysvolume",
+    "musicbot-videoprovider",
     "musicbot-youtube"
 )
