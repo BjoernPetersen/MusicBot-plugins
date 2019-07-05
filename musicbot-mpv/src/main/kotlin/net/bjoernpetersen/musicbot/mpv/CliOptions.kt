@@ -62,6 +62,20 @@ internal class CliOptions(config: Config) {
                 },
                 { "--config=${if (it) "no" else "yes"}" }
             )
+            cliOption(
+                config.boolean("hideOsc") {
+                    description = "Hide the on-screen-controller"
+                    default = true
+                },
+                { if (it) "--no-osc" else null }
+            )
+            cliOption(
+                config.boolean("disableKeyInput") {
+                    description = "Disable default key bindings"
+                    default = true
+                },
+                { if (it) "--no-input-default-bindings" else null }
+            )
         }
     }
 

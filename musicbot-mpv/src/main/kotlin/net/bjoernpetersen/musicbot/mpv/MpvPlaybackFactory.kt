@@ -278,8 +278,6 @@ private class MpvPlayback(
             EXECUTABLE,
             "--input-file=$filePath",
             "--no-input-terminal",
-            "--no-input-default-bindings",
-            "--no-osc",
             "--quiet",
             "--pause"
         )
