@@ -21,11 +21,6 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.FileChooser
-import net.bjoernpetersen.musicbot.api.config.FileSerializer
-import net.bjoernpetersen.musicbot.api.config.IntSerializer
-import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
-import net.bjoernpetersen.musicbot.api.config.NumberBox
 import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
@@ -74,11 +69,7 @@ class MpvPlaybackFactory :
 
     private val logger = KotlinLogging.logger { }
 
-    private lateinit var noVideo: Config.BooleanEntry
-    private lateinit var fullscreen: Config.BooleanEntry
-    private lateinit var screen: Config.SerializedEntry<Int>
-    private lateinit var configFile: Config.SerializedEntry<File>
-    private lateinit var ignoreSystemConfig: Config.BooleanEntry
+    private lateinit var config: CliOptions
 
     @Inject
     private lateinit var fileStorage: FileStorage
@@ -86,40 +77,8 @@ class MpvPlaybackFactory :
 
     override fun createStateEntries(state: Config) {}
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
-        noVideo = config.BooleanEntry(
-            "noVideo",
-            "Don't show video for video files",
-            true
-        )
-        fullscreen = config.BooleanEntry(
-            "fullscreen",
-            "Show videos in fullscreen mode",
-            true
-        )
-        screen = config.SerializedEntry(
-            key = "screen",
-            description = "Screen to show videos on (0-32)",
-            serializer = IntSerializer,
-            configChecker = NonnullConfigChecker,
-            uiNode = NumberBox(0, 32),
-            default = 1
-        )
-
-        configFile = config.SerializedEntry(
-            key = "configFile",
-            description = "A config file in a custom location to include",
-            serializer = FileSerializer,
-            configChecker = { if (it != null && !it.isFile) "Not a file" else null },
-            uiNode = FileChooser(false),
-            default = null
-        )
-        ignoreSystemConfig = config.BooleanEntry(
-            "ignoreSystemConfig",
-            "Ignore the default, system-wide mpv config",
-            true
-        )
-
-        return listOf(noVideo, fullscreen, screen, configFile, ignoreSystemConfig)
+        this.config = CliOptions(config)
+        return this.config.getShownEntries()
     }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
@@ -146,11 +105,7 @@ class MpvPlaybackFactory :
             MpvPlayback(
                 cmdFileDir,
                 inputFile.canonicalPath,
-                noVideo = noVideo.get(),
-                fullscreen = fullscreen.get(),
-                screen = screen.get()!!,
-                configFile = configFile.get(),
-                ignoreSystemConfig = ignoreSystemConfig.get()
+                config
             )
         }
     }
@@ -163,11 +118,7 @@ class MpvPlaybackFactory :
             MpvPlayback(
                 cmdFileDir,
                 "ytdl://$videoId",
-                noVideo = noVideo.get(),
-                fullscreen = fullscreen.get(),
-                screen = screen.get()!!,
-                configFile = configFile.get(),
-                ignoreSystemConfig = ignoreSystemConfig.get()
+                config
             )
         }
     }
@@ -266,11 +217,7 @@ private class MpvHandler : NuAbstractProcessHandler() {
 private class MpvPlayback(
     dir: File,
     private val path: String,
-    private val noVideo: Boolean,
-    private val fullscreen: Boolean,
-    private val screen: Int,
-    private val configFile: File?,
-    private val ignoreSystemConfig: Boolean
+    private val options: CliOptions
 ) : AbstractPlayback() {
 
     private val logger = KotlinLogging.logger { }
@@ -333,16 +280,14 @@ private class MpvPlayback(
             "--no-input-terminal",
             "--no-input-default-bindings",
             "--no-osc",
-            "--config=${if (ignoreSystemConfig) "no" else "yes"}",
             "--quiet",
-            "--video=${if (noVideo) "no" else "auto"}",
-            "--fullscreen=${if (fullscreen) "yes" else "no"}",
-            "--fs-screen=$screen",
-            "--screen=$screen",
             "--pause"
         )
 
-        if (configFile != null) command.add("--include=${configFile.absolutePath}")
+        options.allOptions.forEach {
+            it.getCliArgs().filterNotNull().forEach { command.add(it) }
+        }
+
         command.add(path)
         return command
     }
