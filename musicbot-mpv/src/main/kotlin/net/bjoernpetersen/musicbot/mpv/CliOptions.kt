@@ -22,14 +22,14 @@ internal class CliOptions(config: Config) {
                     description = "Don't show video for video files"
                     default = true
                 },
-                { "--video=${if (it) "no" else "auto"}" }
+                { "--video=${if (it.get()) "no" else "auto"}" }
             )
             cliOption(
                 config.boolean("fullscreen") {
                     description = "Show videos in fullscreen mode"
                     default = true
                 },
-                { "--fullscreen=${if (it) "yes" else "no"}" }
+                { "--fullscreen=${if (it.get()) "yes" else "no"}" }
             )
             cliOptions(
                 config.serialized<Int>("screen") {
@@ -41,8 +41,8 @@ internal class CliOptions(config: Config) {
                 },
                 {
                     listOf(
-                        "--fs-screen=$it",
-                        "--screen=$it"
+                        "--fs-screen=${it.get()}",
+                        "--screen=${it.get()}"
                     )
                 }
             )
@@ -53,28 +53,28 @@ internal class CliOptions(config: Config) {
                     check { if (it != null && !it.isFile) "Not a file" else null }
                     uiNode = FileChooser(false)
                 },
-                { "--include=${it.absolutePath}" }
+                { entry -> entry.get()?.absolutePath?.let { "--include=$it" } }
             )
             cliOption(
                 config.boolean("ignoreSystemConfig") {
                     description = "Ignore the default, system-wide mpv config"
                     default = true
                 },
-                { "--config=${if (it) "no" else "yes"}" }
+                { "--config=${if (it.get()) "no" else "yes"}" }
             )
             cliOption(
                 config.boolean("hideOsc") {
                     description = "Hide the on-screen-controller"
                     default = true
                 },
-                { if (it) "--no-osc" else null }
+                { if (it.get()) "--no-osc" else null }
             )
             cliOption(
                 config.boolean("disableKeyInput") {
                     description = "Disable default key bindings"
                     default = true
                 },
-                { if (it) "--no-input-default-bindings" else null }
+                { if (it.get()) "--no-input-default-bindings" else null }
             )
         }
     }
@@ -84,23 +84,23 @@ internal class CliOptions(config: Config) {
 
 internal fun <T, E : Config.Entry<T>> MutableList<CliOption<*, *>>.cliOptions(
     entry: E,
-    getCliArgs: (value: T) -> List<String?>
+    getCliArgs: (entry: E) -> List<String?>
 ) {
     add(CliOption(entry, getCliArgs))
 }
 
 internal fun <T, E : Config.Entry<T>> MutableList<CliOption<*, *>>.cliOption(
     entry: E,
-    getCliArg: (value: T) -> String?
+    getCliArg: (entry: E) -> String?
 ) {
     add(CliOption(entry, { listOf(getCliArg(it)) }))
 }
 
 internal class CliOption<T, E : Config.Entry<T>>(
     val entry: E,
-    private val getCliArgs: (value: T) -> List<String?>
+    private val getCliArgs: (entry: E) -> List<String?>
 ) {
     fun getCliArgs(): List<String?> {
-        return getCliArgs(entry.get()!!)
+        return getCliArgs(entry)
     }
 }
