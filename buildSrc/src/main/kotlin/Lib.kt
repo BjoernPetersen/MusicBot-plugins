@@ -4,7 +4,7 @@ object Lib {
     const val MUSICBOT = "0.23.0-SNAPSHOT"
 
     const val SLF4J = "1.8.0-beta4"
-    const val JUNIT = "5.5.0"
+    const val JUNIT = "5.5.1"
 
     const val KTOR = "1.2.2"
 
