@@ -19,6 +19,6 @@ object Lib {
     const val SPOTIFY = "2.2.0"
 
     // YouTube
-    const val YOUTUBE_API = "v3-rev20190513-1.30.1"
-    const val CAFFEINE = "2.7.0"
+    const val YOUTUBE_API = "v3-rev20190722-1.30.1"
+    const val CAFFEINE = "2.8.0"
 }
