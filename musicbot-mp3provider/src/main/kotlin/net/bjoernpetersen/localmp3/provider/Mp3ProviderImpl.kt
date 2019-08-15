@@ -166,7 +166,6 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
                     title = id3.title
                     description = id3.artist ?: ""
                     duration = mp3.lengthInSeconds.toInt()
-                    serveLocalImage()
                 }
             } catch (e: Exception) {
                 null
