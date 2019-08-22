@@ -7,7 +7,7 @@ import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.PathSerializer
 import net.bjoernpetersen.musicbot.api.config.actionButton
 import net.bjoernpetersen.musicbot.api.config.choiceBox
-import net.bjoernpetersen.musicbot.api.config.openPath
+import net.bjoernpetersen.musicbot.api.config.openDirectory
 import net.bjoernpetersen.musicbot.api.config.serialized
 import net.bjoernpetersen.musicbot.api.config.string
 import net.bjoernpetersen.musicbot.api.player.Song
@@ -29,13 +29,13 @@ import kotlin.streams.asSequence
 @ExperimentalConfigDsl
 private class FolderSuggesterConfig(config: Config, provider: VideoProvider) {
     val directory by config.serialized<Path> {
-        description = "Directory to videos from"
+        description = "Directory to suggest videos from"
         serializer = PathSerializer
         provider.folder.get()?.let(::default)
-        openPath { directory() }
+        openDirectory()
         check {
             if (it == null) "Required"
-            else if (!it.startsWith(provider.folder.get())) "Needs to be in provider root folder"
+            else if (!it.startsWith(provider.folder.get()!!)) "Needs to be in provider root folder"
             else null
         }
     }

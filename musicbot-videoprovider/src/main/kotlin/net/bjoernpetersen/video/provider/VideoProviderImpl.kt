@@ -14,7 +14,7 @@ import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.PathSerializer
 import net.bjoernpetersen.musicbot.api.config.TextBox
 import net.bjoernpetersen.musicbot.api.config.boolean
-import net.bjoernpetersen.musicbot.api.config.openPath
+import net.bjoernpetersen.musicbot.api.config.openDirectory
 import net.bjoernpetersen.musicbot.api.config.serialized
 import net.bjoernpetersen.musicbot.api.loader.NoResource
 import net.bjoernpetersen.musicbot.api.loader.SongLoadingException
@@ -83,7 +83,7 @@ class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatche
             description = "The folder the video files should be taken from"
             serializer = PathSerializer
             check(::checkFolder)
-            openPath { directory() }
+            openDirectory()
         }
         recursive = config.boolean("recursive") {
             description = "Whether to search the folder recursively"
