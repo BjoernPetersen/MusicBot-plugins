@@ -11,9 +11,13 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.PathChooser
+import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.PathSerializer
 import net.bjoernpetersen.musicbot.api.config.TextBox
+import net.bjoernpetersen.musicbot.api.config.boolean
+import net.bjoernpetersen.musicbot.api.config.openDirectory
+import net.bjoernpetersen.musicbot.api.config.serialized
+import net.bjoernpetersen.musicbot.api.config.string
 import net.bjoernpetersen.musicbot.api.loader.NoResource
 import net.bjoernpetersen.musicbot.api.loader.SongLoadingException
 import net.bjoernpetersen.musicbot.api.player.Song
@@ -36,6 +40,7 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.streams.asSequence
 
+@Suppress("TooManyFunctions")
 class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
@@ -56,39 +61,33 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
     override val subject
         get() = customSubject?.get() ?: folder?.get()?.fileName?.toString() ?: name
 
-    private fun checkFolder(path: Path?): String? {
-        if (path == null) return "Required"
-        if (!Files.isDirectory(path)) return "Not a directory"
-        return null
-    }
-
+    @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
-        folder = config.SerializedEntry(
-            key = "folder",
-            description = "The folder the MP3s should be taken from",
-            default = null,
-            configChecker = ::checkFolder,
-            serializer = PathSerializer,
-            uiNode = PathChooser(isDirectory = true)
-        )
-        recursive = config.BooleanEntry(
-            "recursive",
-            "Whether to search the folder recursively",
-            false
-        )
-
-        customSubject = config.StringEntry(
-            "DisplayName",
-            "Name to display in clients, defaults to folder name",
-            { null },
-            TextBox
-        )
+        folder = config.serialized("folder") {
+            description = "The folder the MP3s should be taken from"
+            check { path ->
+                if (path == null) "Required"
+                else if (!Files.isDirectory(path)) "Not a directory"
+                else null
+            }
+            serializer = PathSerializer
+            openDirectory()
+        }
+        recursive = config.boolean("recursive") {
+            description = "Whether to search the folder recursively"
+            default = false
+        }
+        customSubject = config.string("DisplayName") {
+            description = "Name to display in clients, defaults to folder name"
+            check { null }
+            uiNode = TextBox
+        }
 
         return listOf(folder!!, recursive, customSubject!!)
     }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Initializing...")
@@ -145,30 +144,26 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
 
     private suspend fun createSong(path: Path): Song? {
         return withContext(coroutineContext) {
-            try {
-                val mp3 = try {
-                    Mp3File(path)
-                } catch (e: IOException) {
-                    logger.error(e) { e.message ?: "Exception of type ${e::class.java.name}" }
-                    return@withContext null
-                } catch (e: BaseException) {
-                    logger.error(e) { e.message ?: "Exception of type ${e::class.java.name}" }
-                    return@withContext null
-                }
+            val mp3 = try {
+                Mp3File(path)
+            } catch (e: IOException) {
+                logger.error(e) { e.message ?: "Exception of type ${e::class.java.name}" }
+                return@withContext null
+            } catch (e: BaseException) {
+                logger.error(e) { e.message ?: "Exception of type ${e::class.java.name}" }
+                return@withContext null
+            }
 
-                val id3 = when {
-                    mp3.hasId3v1Tag() -> mp3.id3v1Tag
-                    mp3.hasId3v2Tag() -> mp3.id3v2Tag
-                    else -> return@withContext null
-                }
+            val id3 = when {
+                mp3.hasId3v1Tag() -> mp3.id3v1Tag
+                mp3.hasId3v2Tag() -> mp3.id3v2Tag
+                else -> return@withContext null
+            }
 
-                song(path.toId()) {
-                    title = id3.title
-                    description = id3.artist ?: ""
-                    duration = mp3.lengthInSeconds.toInt()
-                }
-            } catch (e: Exception) {
-                null
+            song(path.toId()) {
+                title = id3.title
+                description = id3.artist ?: ""
+                duration = mp3.lengthInSeconds.toInt()
             }
         }
     }

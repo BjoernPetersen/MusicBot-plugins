@@ -3,6 +3,7 @@ package net.bjoernpetersen.spotify.suggester
 import java.net.MalformedURLException
 import java.net.URL
 
+@Suppress("MagicNumber")
 internal fun getSongId(url: String): String? {
     return try {
         val parsed = URL(url)

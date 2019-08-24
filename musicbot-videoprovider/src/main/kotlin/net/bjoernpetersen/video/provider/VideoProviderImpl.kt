@@ -16,6 +16,7 @@ import net.bjoernpetersen.musicbot.api.config.TextBox
 import net.bjoernpetersen.musicbot.api.config.boolean
 import net.bjoernpetersen.musicbot.api.config.openDirectory
 import net.bjoernpetersen.musicbot.api.config.serialized
+import net.bjoernpetersen.musicbot.api.config.string
 import net.bjoernpetersen.musicbot.api.loader.NoResource
 import net.bjoernpetersen.musicbot.api.loader.SongLoadingException
 import net.bjoernpetersen.musicbot.api.player.Song
@@ -38,6 +39,7 @@ import java.time.Instant
 import java.util.Locale
 import kotlin.streams.asSequence
 
+@Suppress("TooManyFunctions")
 @UseExperimental(ExperimentalConfigDsl::class, ExperimentalVideoFilePlayback::class)
 class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatchers.IO) {
     private val logger = KotlinLogging.logger { }
@@ -72,17 +74,15 @@ class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatche
             return name
         }
 
-    private fun checkFolder(path: Path?): String? {
-        if (path == null) return "Required"
-        if (!Files.isDirectory(path)) return "Not a directory"
-        return null
-    }
-
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
         folder = config.serialized("folder") {
             description = "The folder the video files should be taken from"
             serializer = PathSerializer
-            check(::checkFolder)
+            check { path ->
+                if (path == null) "Required"
+                else if (!Files.isDirectory(path)) "Not a directory"
+                else null
+            }
             openDirectory()
         }
         recursive = config.boolean("recursive") {
@@ -90,18 +90,17 @@ class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatche
             default = false
         }
 
-        customSubject = config.StringEntry(
-            "DisplayName",
-            "Name to display in clients, defaults to folder name",
-            { null },
-            TextBox
-        )
+        customSubject = config.string("DisplayName") {
+            description = "Name to display in clients, defaults to folder name"
+            check { null }
+            uiNode = TextBox
+        }
 
         return listOf(folder, recursive, customSubject!!)
     }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Initializing...")
@@ -159,12 +158,8 @@ class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatche
         }
     }
 
-    private fun cancelScope() {
-        cancel()
-    }
-
     override suspend fun close() {
-        cancelScope()
+        run { cancel() }
     }
 
     override fun getSongs(): Collection<Song> {

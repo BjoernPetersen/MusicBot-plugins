@@ -16,6 +16,7 @@ internal class CliOptions(config: Config) {
     val allOptions: List<CliOption<*, *>>
 
     init {
+        @Suppress("MagicNumber")
         allOptions = ArrayList<CliOption<*, *>>(20).apply {
             cliOption(
                 config.boolean("noVideo") {

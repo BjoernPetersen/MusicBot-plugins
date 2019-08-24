@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("TooManyFunctions")
 class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
 
     private val logger = KotlinLogging.logger {}
@@ -63,8 +64,8 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
         getApi()
 
         songCache = CacheBuilder.newBuilder()
-            .initialCapacity(512)
-            .maximumSize(2048)
+            .initialCapacity(CACHE_INITIAL_CAPACITY)
+            .maximumSize(CACHE_MAXIMUM_CAPACITY)
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build(AsyncLoader(this) { actualLookup(it) })
     }
@@ -79,6 +80,7 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
         job.cancel()
     }
 
+    @Suppress("MagicNumber")
     private fun createSong(
         id: String,
         title: String,
@@ -99,7 +101,7 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
         return withContext(coroutineContext) {
             try {
                 getApi().searchTracks(query)
-                    .limit(40)
+                    .limit(SPOTIFY_API_LIMIT)
                     .offset(offset)
                     .marketFromToken()
                     .build()
@@ -166,10 +168,12 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
 
             logger.debug { "Loading ${missingIds.size} of ${ids.size} requested songs" }
 
-            for (subIds in Lists.partition(missingIds, 50)) {
+            for (subIds in Lists.partition(missingIds, SPOTIFY_SEVERAL_TRACK_API_LIMIT)) {
                 try {
+                    // TODO replace getSeveralTracks call with a sane one if the library supports it
+                    @Suppress("SpreadOperator")
                     getApi()
-                        .getSeveralTracks(*subIds.map { it.value }.toTypedArray())
+                        .getSeveralTracks(*(subIds.map { it.value }.toTypedArray()))
                         .build()
                         .execute()
                         .map { trackToSong(it) }
@@ -186,5 +190,12 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
             }
             result.map { it!!.await() }
         }
+    }
+
+    private companion object {
+        const val SPOTIFY_API_LIMIT = 40
+        const val SPOTIFY_SEVERAL_TRACK_API_LIMIT = 50
+        const val CACHE_INITIAL_CAPACITY = 512
+        const val CACHE_MAXIMUM_CAPACITY: Long = 2048
     }
 }

@@ -103,7 +103,7 @@ class FolderSuggester : Suggester {
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
 
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Loading songs...")
@@ -163,5 +163,5 @@ class FolderSuggester : Suggester {
         return suggestion
     }
 
-    override suspend fun close() {}
+    override suspend fun close() = Unit
 }

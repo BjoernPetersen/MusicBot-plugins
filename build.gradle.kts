@@ -5,6 +5,7 @@ plugins {
     kotlin("jvm") version Plugin.KOTLIN
     id("com.github.ben-manes.versions") version Plugin.VERSIONS
     id("com.diffplug.gradle.spotless") version Plugin.SPOTLESS
+    id("io.gitlab.arturbosch.detekt") version Plugin.DETEKT
     idea
 }
 
@@ -12,6 +13,7 @@ allprojects {
     group = "com.github.bjoernpetersen"
 
     apply(plugin = "com.diffplug.gradle.spotless")
+    apply(plugin = "io.gitlab.arturbosch.detekt")
     apply(plugin = "idea")
 
     spotless {
@@ -30,6 +32,12 @@ allprojects {
             lineEndings = LineEnding.UNIX
             endWithNewline()
         }
+    }
+
+    detekt {
+        toolVersion = Plugin.DETEKT
+        config = files("$rootDir/config/detekt.yml")
+        buildUponDefaultConfig = true
     }
 
     idea {

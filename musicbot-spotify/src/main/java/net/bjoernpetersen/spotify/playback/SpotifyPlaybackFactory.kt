@@ -3,6 +3,7 @@ package net.bjoernpetersen.spotify.playback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.io.errors.IOException
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.plugin.Base
@@ -38,14 +39,16 @@ class SpotifyPlaybackFactory : PlaybackFactory, CoroutineScope {
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> = emptyList()
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     @Throws(InitializationException::class)
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Checking authentication")
         try {
             authenticator.getToken()
-        } catch (e: Exception) {
+        } catch (e: IOException) {
+            throw InitializationException("Authentication error", e)
+        } catch (e: KotlinNullPointerException) {
             throw InitializationException("Not authenticated", e)
         }
     }

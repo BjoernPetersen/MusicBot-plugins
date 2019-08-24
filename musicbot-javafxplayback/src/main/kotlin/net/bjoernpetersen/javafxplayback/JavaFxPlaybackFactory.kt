@@ -19,9 +19,9 @@ class JavaFxPlaybackFactory : Mp3PlaybackFactory, WavePlaybackFactory {
 
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> = emptyList()
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {}
+    override suspend fun initialize(initStateWriter: InitStateWriter) = Unit
 
     @Throws(UnsupportedAudioFileException::class, IOException::class)
     override suspend fun createPlayback(inputFile: File): Playback {
@@ -38,5 +38,5 @@ class JavaFxPlaybackFactory : Mp3PlaybackFactory, WavePlaybackFactory {
         }
     }
 
-    override suspend fun close() {}
+    override suspend fun close() = Unit
 }

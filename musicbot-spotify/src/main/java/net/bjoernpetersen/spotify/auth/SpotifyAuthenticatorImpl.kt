@@ -1,5 +1,6 @@
 package net.bjoernpetersen.spotify.auth
 
+import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import io.ktor.http.encodeURLParameter
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.CoroutineScope
@@ -12,11 +13,13 @@ import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.ActionButton
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
+import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.IntSerializer
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.NumberBox
 import net.bjoernpetersen.musicbot.api.config.PasswordBox
 import net.bjoernpetersen.musicbot.api.config.SerializationException
+import net.bjoernpetersen.musicbot.api.config.serialized
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.util.BrowserOpener
 import java.io.IOException
@@ -35,8 +38,6 @@ import kotlin.coroutines.CoroutineContext
 class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
 
     private val logger = KotlinLogging.logger { }
-
-    private val random = SecureRandom()
 
     override val name: String = "Spotify Auth"
     override suspend fun getToken(): String = currentToken()!!.value
@@ -100,10 +101,6 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
         }
     }
 
-    private fun generateRandomString(): String {
-        return Integer.toString(random.nextInt(Integer.MAX_VALUE))
-    }
-
     private suspend fun authorize(): Token {
         val prevToken = currentToken
         logger.debug("Acquiring auth lock...")
@@ -133,15 +130,17 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
         }
     }
 
-    override fun createConfigEntries(config: Config): List<Config.Entry<*>> = listOf(
-        config.SerializedEntry(
-            "port",
-            "OAuth callback port",
-            IntSerializer,
-            NonnullConfigChecker,
-            NumberBox(1024, 65535),
-            58642
-        ).also { port = it })
+    @UseExperimental(ExperimentalConfigDsl::class)
+    override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
+        port = config.serialized("port") {
+            description = "OAuth callback port"
+            serializer = IntSerializer
+            check(NonnullConfigChecker)
+            uiNode = NumberBox(MIN_PORT, MAX_PORT)
+            default(DEFAULT_PORT)
+        }
+        return listOf(port)
+    }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> {
         tokenExpiration = secrets.SerializedEntry(
@@ -155,7 +154,11 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
                         val token = authorize()
                         currentToken = token
                         true
-                    } catch (e: Exception) {
+                    } catch (e: IOException) {
+                        logger.error(e) {}
+                        false
+                    } catch (e: SpotifyWebApiException) {
+                        logger.error(e) {}
                         false
                     }
                 }
@@ -179,7 +182,7 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
         return listOf(tokenExpiration, clientId)
     }
 
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     override suspend fun close() {
         job.cancel()
@@ -196,10 +199,19 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
             "playlist-read-collaborative"
         )
 
+        const val DEFAULT_PORT = 58642
+        const val MIN_PORT = 1024
+        const val MAX_PORT = 65535
+
         private fun toTimeString(instant: Instant) = DateTimeFormatter
             .ofLocalizedTime(FormatStyle.SHORT)
             .format(ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()))
     }
+}
+
+private val random = SecureRandom()
+private fun generateRandomString(): String {
+    return random.nextInt(Int.MAX_VALUE).toString()
 }
 
 private object InstantSerializer : ConfigSerializer<Instant> {

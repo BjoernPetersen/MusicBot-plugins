@@ -1,12 +1,15 @@
 package net.bjoernpetersen.spotify.volume
 
 import com.wrapper.spotify.SpotifyApi
+import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
+import kotlinx.io.errors.IOException
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
+import net.bjoernpetersen.musicbot.api.plugin.volume.Volume
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.volume.VolumeHandler
@@ -43,19 +46,28 @@ class SpotifyVolumeHandler : VolumeHandler, CoroutineScope {
                     .execute()
                     ?.find { control.deviceId == it.id }
                     ?.volume_percent
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 null
-            } ?: 100
+            } catch (e: SpotifyWebApiException) {
+                logger.debug(e) {}
+                null
+            } ?: Volume.MAX
         }
     }
 
     override suspend fun setVolume(value: Int) {
         withContext(coroutineContext) {
-            getApi()
-                .setVolumeForUsersPlayback(value)
-                .device_id(control.deviceId)
-                .build()
-                .execute()
+            try {
+                getApi()
+                    .setVolumeForUsersPlayback(value)
+                    .device_id(control.deviceId)
+                    .build()
+                    .execute()
+            } catch (e: IOException) {
+                logger.debug(e) {}
+            } catch (e: SpotifyWebApiException) {
+                logger.debug(e) {}
+            }
         }
     }
 
@@ -63,13 +75,15 @@ class SpotifyVolumeHandler : VolumeHandler, CoroutineScope {
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
 
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Trying to access client...")
         val volume = try {
             getVolume()
-        } catch (e: Exception) {
+        } catch (e: IOException) {
+            throw InitializationException(e)
+        } catch (e: SpotifyWebApiException) {
             throw InitializationException(e)
         }
         initStateWriter.state("Volume is $volume")

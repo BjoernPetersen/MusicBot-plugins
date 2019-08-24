@@ -75,7 +75,7 @@ class MpvPlaybackFactory :
     private lateinit var fileStorage: FileStorage
     private lateinit var cmdFileDir: File
 
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
         this.config = CliOptions(config)
         return this.config.getShownEntries()
@@ -123,12 +123,8 @@ class MpvPlaybackFactory :
         }
     }
 
-    private fun cancelScope() {
-        cancel()
-    }
-
     override suspend fun close() {
-        cancelScope()
+        run { cancel() }
     }
 }
 
@@ -138,7 +134,8 @@ private class MpvHandler : NuAbstractProcessHandler() {
     private lateinit var mpv: NuProcess
 
     private val patternMutex = Mutex()
-    private val patterns: MutableMap<Regex, CompletableDeferred<MatchResult>> = HashMap(32)
+    private val patterns: MutableMap<Regex, CompletableDeferred<MatchResult>> =
+        HashMap(PATTERN_CAPACITY)
 
     private val exitValue = CompletableDeferred<Int>()
 
@@ -212,6 +209,10 @@ private class MpvHandler : NuAbstractProcessHandler() {
     override fun onExit(statusCode: Int) {
         exitValue.complete(statusCode)
     }
+
+    private companion object {
+        const val PATTERN_CAPACITY = 32
+    }
 }
 
 private class MpvPlayback(
@@ -246,10 +247,10 @@ private class MpvPlayback(
         }
 
         launch {
-            delay(2000)
+            delay(LOAD_TIME_MILLIS)
             while (mpv.isRunning) {
                 updateProgress()
-                delay(4000)
+                delay(STATE_CHECK_MILLIS)
             }
         }
     }
@@ -333,7 +334,7 @@ private class MpvPlayback(
                 cmdWriter!!.close()
             }
 
-            val exitValue = withTimeoutOrNull(5000) {
+            val exitValue = withTimeoutOrNull(EXIT_TIMEOUT_MILLIS) {
                 handler.getExitValueAsync().await()
             }
             if (exitValue == null) {
@@ -349,7 +350,11 @@ private class MpvPlayback(
     }
 
     private companion object {
-        private val PROGRESS_MATCH = Regex("""(\d+\.\d+)""")
+        val PROGRESS_MATCH = Regex("""(\d+\.\d+)""")
+
+        const val LOAD_TIME_MILLIS: Long = 2000
+        const val STATE_CHECK_MILLIS: Long = 4000
+        const val EXIT_TIMEOUT_MILLIS: Long = 5000
     }
 }
 
@@ -357,5 +362,5 @@ private class NoYouTubeResource(videoId: String) : YouTubeResource(videoId) {
     override val isValid: Boolean
         get() = true
 
-    override suspend fun free() {}
+    override suspend fun free() = Unit
 }

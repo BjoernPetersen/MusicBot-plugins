@@ -8,6 +8,7 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.roundToInt
 
+@Suppress("MagicNumber")
 internal enum class ValueMode(val description: String) {
     Percent("Percent (0-100)") {
         override fun toPercent(value: String): Int {
@@ -53,7 +54,7 @@ internal enum class ValueMode(val description: String) {
 
         override fun deserialize(string: String): ValueMode {
             return try {
-                ValueMode.valueOf(string)
+                valueOf(string)
             } catch (e: IllegalArgumentException) {
                 throw SerializationException()
             }

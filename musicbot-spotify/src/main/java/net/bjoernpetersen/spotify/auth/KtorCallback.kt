@@ -82,7 +82,7 @@ internal class KtorCallback(private val port: Int) {
                 result.await()
             } finally {
                 cancelJob.cancel()
-                server.stop(50, 200, TimeUnit.MILLISECONDS)
+                server.stop(SHUTDOWN_GRACE_MILLIS, SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
             }
         }
     }
@@ -95,6 +95,9 @@ internal class KtorCallback(private val port: Int) {
         private const val CALLBACK_PATH = "/redirect"
         const val REDIRECTED_PATH = "/callback"
         const val LOCALHOST = "localhost"
+
+        const val SHUTDOWN_GRACE_MILLIS: Long = 50
+        const val SHUTDOWN_TIMEOUT_MILLIS: Long = 200
 
         private const val REDIRECT_PAGE_FILE = "RedirectPage.html"
         private val redirectPageContent = loadHtml(REDIRECT_PAGE_FILE)

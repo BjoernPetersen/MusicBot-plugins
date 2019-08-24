@@ -2,6 +2,7 @@ package net.bjoernpetersen.spotify.playback
 
 import com.google.gson.JsonArray
 import com.wrapper.spotify.SpotifyApi
+import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import com.wrapper.spotify.exceptions.detailed.BadGatewayException
 import com.wrapper.spotify.exceptions.detailed.NotFoundException
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext
@@ -9,6 +10,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
+import kotlinx.io.errors.IOException
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
 import net.bjoernpetersen.musicbot.spi.plugin.PlaybackState
@@ -31,13 +33,20 @@ internal class SpotifyPlayback(
 
     override suspend fun pause() {
         withContext(coroutineContext) {
-            try {
+            val error = try {
                 getApi().pauseUsersPlayback()
                     .device_id(deviceId)
                     .build()
                     .execute()
-            } catch (e: Exception) {
-                logger.error(e) { "Could not pause playback" }
+                null
+            } catch (e: IOException) {
+                e
+            } catch (e: SpotifyWebApiException) {
+                e
+            }
+
+            if (error != null) {
+                logger.error(error) { "Could not pause playback" }
                 feedbackChannel.updateState(PlaybackState.BROKEN)
             }
         }
@@ -54,7 +63,7 @@ internal class SpotifyPlayback(
 
     override suspend fun play() {
         withContext(coroutineContext) {
-            try {
+            val error = try {
                 getApi().startResumeUsersPlayback()
                     .device_id(deviceId)
                     .apply {
@@ -69,23 +78,34 @@ internal class SpotifyPlayback(
                     .build()
                     .execute()
                 isStarted = true
-            } catch (e: Exception) {
-                logger.error(e) { "Could not play playback" }
+                null
+            } catch (e: IOException) {
+                e
+            } catch (e: SpotifyWebApiException) {
+                e
+            }
+
+            if (error != null) {
+                logger.error(error) { "Could not play playback" }
                 feedbackChannel.updateState(PlaybackState.BROKEN)
             }
         }
     }
 
+    @Suppress("ReturnCount")
     private suspend fun checkState() {
         val state: CurrentlyPlayingContext? = try {
             getApi().informationAboutUsersCurrentPlayback
                 .build()
                 .execute()
-        } catch (e: Exception) {
+        } catch (e: SpotifyWebApiException) {
             logger.error(e) { "Could not check state" }
             if (e !is BadGatewayException && e !is NotFoundException) {
                 feedbackChannel.updateState(PlaybackState.BROKEN)
             }
+            return
+        } catch (e: IOException) {
+            logger.error(e) { "Could not check state" }
             return
         }
 
@@ -101,20 +121,22 @@ internal class SpotifyPlayback(
         yield()
 
         state.apply {
-            val playbackState = if (!is_playing) {
-                if (
-                    progress_ms == null || progress_ms == 0 ||
-                    item == null || item.id != songId
-                ) return markDone()
-
-                PlaybackState.PAUSE
-            } else if (item != null && item.id != songId) {
-                return markDone()
-            } else {
-                PlaybackState.PLAY
-            }
-
+            val playbackState = toState() ?: return markDone()
             if (!isDone()) feedbackChannel.updateState(playbackState)
+        }
+    }
+
+    private fun CurrentlyPlayingContext.toState(): PlaybackState? {
+        return if (!is_playing) {
+            @Suppress("ComplexCondition")
+            if (
+                progress_ms == null || progress_ms == 0 ||
+                item == null || item.id != songId
+            ) null else PlaybackState.PAUSE
+        } else if (item != null && item.id != songId) {
+            null
+        } else {
+            PlaybackState.PLAY
         }
     }
 

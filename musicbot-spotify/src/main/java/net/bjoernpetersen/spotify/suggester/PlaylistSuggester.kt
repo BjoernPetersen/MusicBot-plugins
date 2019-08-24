@@ -1,10 +1,12 @@
 package net.bjoernpetersen.spotify.suggester
 
 import com.wrapper.spotify.SpotifyApi
+import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
+import kotlinx.io.errors.IOException
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.ChoiceBox
 import net.bjoernpetersen.musicbot.api.config.Config
@@ -18,11 +20,13 @@ import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.spotify.auth.SpotifyAuthenticator
 import net.bjoernpetersen.spotify.marketFromToken
 import net.bjoernpetersen.spotify.provider.SpotifyProvider
-import java.io.IOException
 import java.util.Collections
 import java.util.LinkedList
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
+@Suppress("TooManyFunctions")
 @IdBase("Spotify playlist")
 class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.IO) {
 
@@ -64,10 +68,13 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
             val playlists = try {
                 getApi()
                     .getListOfUsersPlaylists(userId)
-                    .limit(50)
+                    .limit(SPOTIFY_REQUEST_LIMIT)
                     .build()
                     .execute()
-            } catch (e: Throwable) {
+            } catch (e: IOException) {
+                logger.error(e) { "Could not retrieve playlists" }
+                return@withContext null
+            } catch (e: SpotifyWebApiException) {
                 logger.error(e) { "Could not retrieve playlists" }
                 return@withContext null
             }
@@ -87,7 +94,7 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
     override suspend fun getNextSuggestions(maxLength: Int): List<Song> =
         withContext(coroutineContext) {
             val startIndex = nextIndex
-            while (nextSongs.size < Math.max(Math.min(50, maxLength), 1)) {
+            while (nextSongs.size < max(min(SUGGESTIONS_LIMIT, maxLength), 1)) {
                 // load more suggestions
                 nextSongs.add(playlistSongs[nextIndex])
                 nextIndex = (nextIndex + 1) % playlistSongs.size
@@ -129,7 +136,7 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
         return emptyList()
     }
 
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         withContext(coroutineContext) {
@@ -159,14 +166,18 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
 
     @Throws(InitializationException::class)
     private suspend fun loadUserId(): String {
-        try {
+        val error = try {
             return getApi().currentUsersProfile
                 .build()
                 .execute()
                 .id
-        } catch (e: Exception) {
-            throw InitializationException("Could not get user ID", e)
+        } catch (e: IOException) {
+            e
+        } catch (e: SpotifyWebApiException) {
+            e
         }
+
+        throw InitializationException("Could not load user ID", error)
     }
 
     @Throws(InitializationException::class)
@@ -178,8 +189,10 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
                 .offset(offset)
                 .build()
                 .execute()
-        } catch (e: Exception) {
-            throw InitializationException("Could not load playlist", e)
+        } catch (e: IOException) {
+            throw InitializationException("IO error during playlist loading", e)
+        } catch (e: SpotifyWebApiException) {
+            throw InitializationException("API error during playlist loading", e)
         }
 
         val ids = playlistTracks.items
@@ -195,13 +208,14 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
         else result + loadPlaylist(playlistId, offset + playlistTracks.items.size)
     }
 
-    private fun cancelScope() {
-        cancel()
-    }
-
     @Throws(IOException::class)
     override suspend fun close() {
-        cancelScope()
+        run { cancel() }
         nextSongs.clear()
+    }
+
+    private companion object {
+        const val SPOTIFY_REQUEST_LIMIT = 50
+        const val SUGGESTIONS_LIMIT = 50
     }
 }

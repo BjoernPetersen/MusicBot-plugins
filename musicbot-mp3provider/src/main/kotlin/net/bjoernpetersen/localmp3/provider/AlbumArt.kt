@@ -9,6 +9,7 @@ import java.nio.file.Path
 
 private val logger = KotlinLogging.logger { }
 
+@Suppress("ReturnCount")
 fun loadImage(basePath: Path, path: Path): ImageData? {
     if (!path.normalize().startsWith(basePath.normalize())) {
         logger.warn { "Tried to load data from restricted file: $path" }
@@ -23,9 +24,13 @@ fun loadImage(basePath: Path, path: Path): ImageData? {
         return null
     }
 
-    if (!mp3File.hasId3v2Tag()) return null
-    val tag = mp3File.id3v2Tag
-    val image = tag.albumImage ?: return null
-    val type = tag.albumImageMimeType ?: "image/*"
-    return ImageData(type, image)
+    if (mp3File.hasId3v2Tag()) {
+        val tag = mp3File.id3v2Tag
+        val image = tag.albumImage
+        if (image != null) {
+            val type = tag.albumImageMimeType ?: "image/*"
+            return ImageData(type, image)
+        }
+    }
+    return null
 }

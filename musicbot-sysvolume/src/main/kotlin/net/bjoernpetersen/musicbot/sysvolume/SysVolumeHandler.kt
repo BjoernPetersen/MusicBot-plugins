@@ -78,8 +78,8 @@ class SysVolumeHandler : VolumeHandler, CoroutineScope {
     }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
-    override fun createStateEntries(state: Config) {}
-    override suspend fun initialize(initStateWriter: InitStateWriter) {}
+    override fun createStateEntries(state: Config) = Unit
+    override suspend fun initialize(initStateWriter: InitStateWriter) = Unit
     override suspend fun close() {
         job.cancel()
     }

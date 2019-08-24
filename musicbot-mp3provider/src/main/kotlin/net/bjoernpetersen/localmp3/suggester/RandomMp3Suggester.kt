@@ -2,7 +2,9 @@ package net.bjoernpetersen.localmp3.suggester
 
 import net.bjoernpetersen.localmp3.provider.Mp3Provider
 import net.bjoernpetersen.musicbot.api.config.Config
+import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.TextBox
+import net.bjoernpetersen.musicbot.api.config.string
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
@@ -11,31 +13,36 @@ import java.util.LinkedList
 import javax.inject.Inject
 
 @IdBase("Random local MP3s")
-class Mp3Suggester : Suggester {
+class RandomMp3Suggester : Suggester {
     private val nextSongs = LinkedList<Song>()
     @Inject
     private lateinit var provider: Mp3Provider
 
-    private var customSubject: Config.StringEntry? = null
+    private lateinit var customSubject: Config.StringEntry
 
     override val name = "Random local MP3"
     override val description = "Plays random MP3s from a local directory"
-    override val subject
-        get() = customSubject?.get() ?: "Random ${provider.subject}"
+    override val subject: String
+        get() {
+            val subject = if (this::customSubject.isInitialized) customSubject.get()
+            else null
 
+            return subject ?: "Random ${provider.subject}"
+        }
+
+    @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
-        customSubject = config.StringEntry(
-            "DisplayName",
-            "Name to display in clients",
-            { null },
-            TextBox
-        )
+        customSubject = config.string("DisplayName") {
+            description = "Name to display in clients"
+            check { null }
+            uiNode = TextBox
+        }
 
-        return listOf(customSubject!!)
+        return listOf(customSubject)
     }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Loading next songs...")
@@ -53,7 +60,10 @@ class Mp3Suggester : Suggester {
 
     override suspend fun getNextSuggestions(maxLength: Int): List<Song> {
         if (nextSongs.isEmpty()) refreshNextSongs()
-        return nextSongs.subList(0, minOf(nextSongs.size, minOf(20, maxOf(1, maxLength))))
+        return nextSongs.subList(
+            0,
+            minOf(nextSongs.size, minOf(MAX_SUGGESTIONS, maxOf(1, maxLength)))
+        )
     }
 
     override suspend fun suggestNext(): Song {
@@ -63,5 +73,9 @@ class Mp3Suggester : Suggester {
 
     override suspend fun removeSuggestion(song: Song) {
         nextSongs.remove(song)
+    }
+
+    private companion object {
+        const val MAX_SUGGESTIONS = 20
     }
 }

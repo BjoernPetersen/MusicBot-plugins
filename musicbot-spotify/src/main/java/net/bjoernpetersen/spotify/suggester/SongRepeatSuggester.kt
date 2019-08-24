@@ -41,11 +41,11 @@ class SongRepeatSuggester : Suggester, CoroutineScope {
 
     override suspend fun getNextSuggestions(maxLength: Int): List<Song> = listOf(song)
 
-    override suspend fun removeSuggestion(song: Song) {}
+    override suspend fun removeSuggestion(song: Song) = Unit
 
-    override suspend fun notifyPlayed(songEntry: SongEntry) {}
+    override suspend fun notifyPlayed(songEntry: SongEntry) = Unit
 
-    override suspend fun dislike(song: Song) {}
+    override suspend fun dislike(song: Song) = Unit
 
     @Throws(InitializationException::class)
     override suspend fun initialize(initStateWriter: InitStateWriter) {
@@ -70,7 +70,7 @@ class SongRepeatSuggester : Suggester, CoroutineScope {
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
 
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     override suspend fun close() {
         job.cancel()

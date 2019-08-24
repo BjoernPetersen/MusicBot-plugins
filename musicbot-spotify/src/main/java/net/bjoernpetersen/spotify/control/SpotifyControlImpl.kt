@@ -1,12 +1,14 @@
 package net.bjoernpetersen.spotify.control
 
 import com.wrapper.spotify.SpotifyApi
+import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import com.wrapper.spotify.model_objects.miscellaneous.Device
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import kotlinx.io.errors.IOException
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.ChoiceBox
 import net.bjoernpetersen.musicbot.api.config.Config
@@ -45,7 +47,10 @@ class SpotifyControlImpl : SpotifyControl, CoroutineScope {
                         .build()
                         .execute()
                         .map(::SimpleDevice)
-                } catch (e: Exception) {
+                } catch (e: IOException) {
+                    logger.error(e) { "Could not retrieve device list" }
+                    null
+                } catch (e: SpotifyWebApiException) {
                     logger.error(e) { "Could not retrieve device list" }
                     null
                 }
@@ -65,7 +70,7 @@ class SpotifyControlImpl : SpotifyControl, CoroutineScope {
     }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Checking device config")

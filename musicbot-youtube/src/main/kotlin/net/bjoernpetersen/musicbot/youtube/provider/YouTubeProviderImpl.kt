@@ -12,7 +12,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
@@ -20,6 +20,7 @@ import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.PasswordBox
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.player.song
+import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
@@ -32,25 +33,17 @@ import java.time.Duration
 import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 import kotlin.math.max
 import kotlin.math.min
 
-private const val SEARCH_RESULT_PARTS = "id"
-private const val VIDEO_RESULT_PARTS = "id,snippet,contentDetails"
-private const val SEARCH_TYPE = "video"
-
-class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
+@Suppress("TooManyFunctions")
+class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispatchers.IO) {
     override val description: String
         get() = "Provides YouTube videos/songs"
     override val subject: String
         get() = name
 
     private val logger = KotlinLogging.logger { }
-
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
 
     private lateinit var apiKeyEntry: Config.StringEntry
     override val apiKey: String
@@ -64,7 +57,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
     private lateinit var songCache: LoadingCache<String, Deferred<Song?>>
     private lateinit var searchCache: LoadingCache<String, Deferred<List<Song>?>>
 
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> = emptyList()
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> {
@@ -78,6 +71,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
         return listOf(apiKeyEntry)
     }
 
+    @Suppress("MagicNumber")
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Creating API access object")
         api = YouTube
@@ -120,7 +114,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
                 withContext(coroutineContext) {
                     for (partition: List<IndexedValue<String>> in Lists.partition(
                         toBeLookedUp,
-                        50
+                        BATCH_LOOKUP_MAX
                     )) {
                         val idsString = partition.joinToString(",") { pair -> pair.value }
 
@@ -165,10 +159,6 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
         }
     }
 
-    private fun getDuration(encodedDuration: String): Int {
-        return Duration.parse(encodedDuration).seconds.toInt()
-    }
-
     override suspend fun search(query: String, offset: Int): List<Song> {
         val trimmedQuery = query.trim()
         return when {
@@ -180,6 +170,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
         }
     }
 
+    @Suppress("ReturnCount")
     private suspend fun actualSearch(query: String, offset: Int): List<Song> {
         if (query.isBlank()) {
             return emptyList()
@@ -193,7 +184,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
                     .setKey(apiKey)
                     .setQ(query)
                     .setType(SEARCH_TYPE)
-                    .setMaxResults(50L)
+                    .setMaxResults(BATCH_LOOKUP_MAX.toLong())
                     .execute()
                     .items
             }
@@ -203,7 +194,10 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
         }
 
         val fixedResults = searchResults
-            .subList(max(0, min(offset, searchResults.size - 1)), min(searchResults.size, 50))
+            .subList(
+                max(0, min(offset, searchResults.size - 1)),
+                min(searchResults.size, BATCH_LOOKUP_MAX)
+            )
             .filter { s -> s.id.videoId != null }
 
         return lookupBatch(fixedResults.map { it.id.videoId })
@@ -226,7 +220,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
             }
         } catch (e: IOException) {
             logger.error(e) { "Error looking up song" }
-            return null
+            emptyList()
         }
 
         if (results.isEmpty()) {
@@ -247,6 +241,18 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope {
     }
 
     override suspend fun close() {
-        job.cancel()
+        run { cancel() }
     }
+
+    private companion object {
+        const val SEARCH_RESULT_PARTS = "id"
+        const val VIDEO_RESULT_PARTS = "id,snippet,contentDetails"
+        const val SEARCH_TYPE = "video"
+
+        const val BATCH_LOOKUP_MAX = 50
+    }
+}
+
+private fun getDuration(encodedDuration: String): Int {
+    return Duration.parse(encodedDuration).seconds.toInt()
 }
