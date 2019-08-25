@@ -8,9 +8,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import kotlinx.io.errors.IOException
 import mu.KotlinLogging
-import net.bjoernpetersen.musicbot.api.config.ChoiceBox
 import net.bjoernpetersen.musicbot.api.config.Config
+import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
+import net.bjoernpetersen.musicbot.api.config.boolean
+import net.bjoernpetersen.musicbot.api.config.choiceBox
+import net.bjoernpetersen.musicbot.api.config.serialized
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
@@ -110,19 +113,24 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
         nextSongs.remove(song)
     }
 
+    @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
-        shuffle = config.BooleanEntry(
-            "shuffle",
-            "Whether the playlist should be shuffled",
-            true
-        )
-        playlistId = config.SerializedEntry(
-            "playlist",
-            "One of your public playlists to play",
-            PlaylistChoice,
-            NonnullConfigChecker,
-            ChoiceBox(PlaylistChoice::displayName, { findPlaylists() }, true)
-        )
+        shuffle = config.boolean("shuffle") {
+            description = "Whether the playlist should be shuffled"
+            default = true
+        }
+        playlistId = config.serialized("playlist") {
+            description = "One of your public playlists to play"
+            serializer = PlaylistChoice
+            check(NonnullConfigChecker)
+            choiceBox {
+                describe { it.displayName }
+                lazy()
+                refresh {
+                    findPlaylists()?.sortedBy { it.displayName }
+                }
+            }
+        }
         return listOf(shuffle, playlistId)
     }
 
