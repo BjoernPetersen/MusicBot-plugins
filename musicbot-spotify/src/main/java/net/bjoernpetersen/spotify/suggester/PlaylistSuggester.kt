@@ -17,13 +17,13 @@ import net.bjoernpetersen.musicbot.api.config.serialized
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
+import net.bjoernpetersen.musicbot.spi.plugin.BrokenSuggesterException
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.spotify.auth.SpotifyAuthenticator
 import net.bjoernpetersen.spotify.marketFromToken
 import net.bjoernpetersen.spotify.provider.SpotifyProvider
-import java.util.Collections
 import java.util.LinkedList
 import javax.inject.Inject
 import kotlin.math.max
@@ -96,6 +96,7 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
 
     override suspend fun getNextSuggestions(maxLength: Int): List<Song> =
         withContext(coroutineContext) {
+            if (playlistSongs.isEmpty()) throw BrokenSuggesterException("Empty playlist")
             val startIndex = nextIndex
             while (nextSongs.size < max(min(SUGGESTIONS_LIMIT, maxLength), 1)) {
                 // load more suggestions
@@ -106,7 +107,7 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
                     break
                 }
             }
-            Collections.unmodifiableList(nextSongs)
+            nextSongs.toList()
         }
 
     override suspend fun removeSuggestion(song: Song) = withContext<Unit>(coroutineContext) {
