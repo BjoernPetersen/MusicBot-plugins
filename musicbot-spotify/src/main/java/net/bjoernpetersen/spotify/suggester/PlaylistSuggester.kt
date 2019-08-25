@@ -206,7 +206,7 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
         val ids = playlistTracks.items
             .asSequence()
             .map { it.track }
-            .filter { it.isPlayable }
+            .filter { it?.isPlayable ?: false }
             .map { it.id }
             .toList()
 
