@@ -208,7 +208,7 @@ private class Playbacks @Inject private constructor() {
 
     operator fun get(path: Path): FilePlaybackFactory {
         val extension = path.extension
-        if (extension !in supported) throw IllegalArgumentException("Unsupported file: $path")
+        require(extension in supported) { "Unsupported file: $path" }
         return when (extension) {
             "avi" -> aviPlayback
             "mkv" -> mkvPlayback
