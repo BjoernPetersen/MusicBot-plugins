@@ -9,6 +9,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import me.xdrop.fuzzywuzzy.FuzzySearch
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
@@ -177,16 +178,23 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
     }
 
     override suspend fun search(query: String, offset: Int): List<Song> {
-        val queryParts = query.toLowerCase().split(" ")
-
-        return songById.values.filter {
-            queryParts.any { query ->
-                it.title.toLowerCase().contains(query) ||
-                    it.description.toLowerCase().contains(query)
+        return songById.values.asSequence()
+            .sortedByDescending {
+                val titleScore = FuzzySearch.ratio(query, it.title) * TITLE_WEIGHT
+                val descriptionScore = FuzzySearch.ratio(query, it.description) * DESCRIPTION_WEIGHT
+                maxOf(titleScore, descriptionScore)
             }
-        }
+            .drop(offset)
+            .take(MAX_SEARCH_RESULTS)
+            .toList()
     }
 
     override suspend fun lookup(id: String): Song = songById[id]
         ?: throw NoSuchSongException(id, Mp3Provider::class)
+
+    private companion object {
+        const val TITLE_WEIGHT = 1.0
+        const val DESCRIPTION_WEIGHT = 0.8
+        const val MAX_SEARCH_RESULTS = 50
+    }
 }

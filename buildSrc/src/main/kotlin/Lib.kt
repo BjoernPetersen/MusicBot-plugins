@@ -10,6 +10,7 @@ object Lib {
 
     // Mp3Provider
     const val ID3_TAG = "0.9.1"
+    const val FUZZYWUZZY = "1.2.0"
 
     // mpv
     const val YOUTUBE_PROVIDER = "0.16.0"

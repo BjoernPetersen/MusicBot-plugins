@@ -19,6 +19,11 @@ dependencies {
         name = "mp3agic",
         version = Lib.ID3_TAG
     )
+    implementation(
+        group = "me.xdrop",
+        name = "fuzzywuzzy",
+        version = Lib.FUZZYWUZZY
+    )
 
     testImplementation(
         group = "com.github.bjoernpetersen",

@@ -14,6 +14,12 @@ dependencies {
         isChanging = Lib.MUSICBOT.contains("SNAPSHOT")
     }
 
+    implementation(
+        group = "me.xdrop",
+        name = "fuzzywuzzy",
+        version = Lib.FUZZYWUZZY
+    )
+
     testImplementation(
         group = "com.github.bjoernpetersen",
         name = "musicbot",
