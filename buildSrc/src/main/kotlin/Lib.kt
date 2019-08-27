@@ -1,7 +1,7 @@
 object Lib {
     const val KOTLIN = Plugin.KOTLIN
 
-    const val MUSICBOT = "0.23.0-SNAPSHOT"
+    const val MUSICBOT = "0.23.0"
 
     const val SLF4J = "1.8.0-beta4"
     const val JUNIT = "5.5.1"
@@ -11,6 +11,7 @@ object Lib {
     // Mp3Provider
     const val ID3_TAG = "0.9.1"
     const val FUZZYWUZZY = "1.2.0"
+    const val SQLITE = "3.28.0"
 
     // mpv
     const val YOUTUBE_PROVIDER = "0.16.0"
