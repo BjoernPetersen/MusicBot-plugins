@@ -1,13 +1,8 @@
 package net.bjoernpetersen.localmp3.provider
 
-import com.mpatric.mp3agic.BaseException
-import com.mpatric.mp3agic.Mp3File
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import mu.KotlinLogging
@@ -22,7 +17,6 @@ import net.bjoernpetersen.musicbot.api.config.string
 import net.bjoernpetersen.musicbot.api.loader.NoResource
 import net.bjoernpetersen.musicbot.api.loader.SongLoadingException
 import net.bjoernpetersen.musicbot.api.player.Song
-import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.spi.image.AlbumArtSupplier
 import net.bjoernpetersen.musicbot.spi.image.ImageData
 import net.bjoernpetersen.musicbot.spi.loader.Resource
@@ -31,15 +25,13 @@ import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3PlaybackFactory
-import java.io.IOException
+import net.bjoernpetersen.musicbot.spi.util.FileStorage
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Duration
 import java.time.Instant
-import java.util.Locale
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
-import kotlin.streams.asSequence
 
 @Suppress("TooManyFunctions")
 class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
@@ -53,6 +45,8 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
 
     @Inject
     private lateinit var playbackFactory: Mp3PlaybackFactory
+    @Inject
+    private lateinit var fileStorage: FileStorage
     private lateinit var songById: Map<String, Song>
 
     override val name = "Local MP3"
@@ -101,23 +95,10 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
         initWriter: InitStateWriter,
         root: Path,
         recursive: Boolean
-    ): Map<String, Song> =
-        (if (recursive) Files.walk(root).asSequence() else Files.list(root).asSequence())
-            .filter { Files.isRegularFile(it) }
-            .filter { it.extension.toLowerCase(Locale.US) == "mp3" }
-            .map { createSongAsync(initWriter, it) }
-            .toList().awaitAll()
-            .filterNotNull()
-            .associateBy(Song::id) { it }
-
-    private fun createSongAsync(initWriter: InitStateWriter, path: Path): Deferred<Song?> = async {
-        logger.debug { "Loading tag for '$path'" }
-        createSong(path).also {
-            if (it == null) {
-                initWriter.warning("Could not load song from '$path'")
-            } else {
-                initWriter.state("""Loaded song ${it.title}""")
-            }
+    ): Map<String, Song> {
+        val indexDir = fileStorage.forPlugin(this).toPath()
+        return Index(this, indexDir, root).use {
+            it.load(initWriter, recursive)
         }
     }
 
@@ -129,32 +110,6 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
             return null
         }
         return loadImage(path) ?: loadFolderImage(path)
-    }
-
-    private suspend fun createSong(path: Path): Song? {
-        return withContext(coroutineContext) {
-            val mp3 = try {
-                Mp3File(path)
-            } catch (e: IOException) {
-                logger.error(e) { e.message ?: "Exception of type ${e::class.java.name}" }
-                return@withContext null
-            } catch (e: BaseException) {
-                logger.error(e) { e.message ?: "Exception of type ${e::class.java.name}" }
-                return@withContext null
-            }
-
-            val id3 = when {
-                mp3.hasId3v1Tag() -> mp3.id3v1Tag
-                mp3.hasId3v2Tag() -> mp3.id3v2Tag
-                else -> return@withContext null
-            }
-
-            song(path.toId()) {
-                title = id3.title
-                description = id3.artist ?: ""
-                duration = mp3.lengthInSeconds.toInt()
-            }
-        }
     }
 
     override suspend fun close() {
