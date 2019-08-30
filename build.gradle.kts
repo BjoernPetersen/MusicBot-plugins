@@ -36,7 +36,7 @@ allprojects {
 
     detekt {
         toolVersion = Plugin.DETEKT
-        config = files("$rootDir/config/detekt.yml")
+        config = files("$rootDir/buildConfig/detekt.yml")
         buildUponDefaultConfig = true
     }
 
