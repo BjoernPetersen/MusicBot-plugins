@@ -34,7 +34,7 @@ jobs:
       - with_cache:
           steps:
             - run:
-               command: ./gradlew dependencies
+                command: ./gradlew dependencies
             - save_cache:
                 key: v1-{{ checksum "build.gradle.kts" }}-{{ checksum "buildSrc/src/main/kotlin/Plugin.kt" }}-{{ checksum "buildSrc/src/main/kotlin/Lib.kt" }}
                 paths:
@@ -125,6 +125,11 @@ workflows:
           requires:
             - build_cache
       - check:
+          name: check_radio
+          project: radio
+          requires:
+            - build_cache
+      - check:
           name: check_spotify
           project: spotify
           requires:
@@ -168,6 +173,11 @@ workflows:
           name: build_mpv
           requires:
             - check_mpv
+      - build:
+          project: radio
+          name: build_radio
+          requires:
+            - check_radio
       - build:
           project: spotify
           name: build_spotify

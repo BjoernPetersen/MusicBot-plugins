@@ -4,6 +4,7 @@ include(
     "musicbot-javafxplayback",
     "musicbot-mp3provider",
     "musicbot-mpv",
+    "musicbot-radio",
     "musicbot-spotify",
     "musicbot-sysvolume",
     "musicbot-videoprovider",

@@ -17,6 +17,9 @@ object Lib {
     const val YOUTUBE_PROVIDER = "0.16.0"
     const val NU_PROCESS = "1.2.4"
 
+    // Radio
+    const val M3U_PARSER = "0.2.0"
+
     // Spotify
     const val SPOTIFY = "2.2.0"
 
