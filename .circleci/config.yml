@@ -104,6 +104,11 @@ workflows:
     jobs:
       - build_cache
       - check:
+          name: check_bridge
+          project: bridge
+          requires:
+            - build_cache
+      - check:
           name: check_javafxplayback
           project: javafxplayback
           executor: jfx
@@ -142,6 +147,11 @@ workflows:
       - check_root:
           requires:
             - build_cache
+      - build:
+          project: bridge
+          name: build_bridge
+          requires:
+            - check_bridge
       - build:
           project: javafxplayback
           name: build_javafxplayback
