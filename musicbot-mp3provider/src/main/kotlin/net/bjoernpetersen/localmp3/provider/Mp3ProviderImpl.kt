@@ -49,46 +49,25 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
 
     private val logger = KotlinLogging.logger { }
 
-    private var folder: Config.SerializedEntry<Path>? = null
-    private lateinit var recursive: Config.BooleanEntry
+    private lateinit var config: Mp3ProviderConfig
+
     @Inject
     private lateinit var playbackFactory: Mp3PlaybackFactory
     private lateinit var songById: Map<String, Song>
-
-    private lateinit var customSubject: Config.StringEntry
 
     override val name = "Local MP3"
     override val description = "MP3s from some local directory"
     override val subject: String
         get() {
-            val customSubject = if (this::customSubject.isInitialized) customSubject.get()
+            val fromConfig = if (this::config.isInitialized)
+                config.customSubject.get() ?: config.folder.get()?.fileName?.toString()
             else null
-            return customSubject ?: folder?.get()?.fileName?.toString() ?: name
+            return fromConfig ?: name
         }
 
-    @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
-        folder = config.serialized("folder") {
-            description = "The folder the MP3s should be taken from"
-            check { path ->
-                if (path == null) "Required"
-                else if (!Files.isDirectory(path)) "Not a directory"
-                else null
-            }
-            serializer = PathSerializer
-            openDirectory()
-        }
-        recursive = config.boolean("recursive") {
-            description = "Whether to search the folder recursively"
-            default = false
-        }
-        customSubject = config.string("DisplayName") {
-            description = "Name to display in clients, defaults to folder name"
-            check { null }
-            uiNode = TextBox
-        }
-
-        return listOf(folder!!, recursive, customSubject)
+        this.config = Mp3ProviderConfig(config)
+        return this.config.allEntries
     }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
@@ -96,11 +75,11 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Initializing...")
-        val folder = folder?.get() ?: throw InitializationException()
+        val folder = config.folder.get() ?: throw InitializationException()
         withContext(coroutineContext) {
             initStateWriter.state("Looking for songs...")
             val start = Instant.now()
-            songById = initializeSongs(initStateWriter, folder, recursive.get())
+            songById = initializeSongs(initStateWriter, folder, config.recursive.get())
             val duration = Duration.between(start, Instant.now())
             initStateWriter.state("Done (found ${songById.size} in ${duration.seconds} seconds).")
         }
@@ -144,7 +123,7 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
 
     override fun getAlbumArt(songId: String): ImageData? {
         val path = songId.toPath()
-        return loadImage(folder!!.get()!!, path)
+        return loadImage(config.folder.get()!!, path)
     }
 
     private suspend fun createSong(path: Path): Song? {
@@ -201,4 +180,30 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
         const val DESCRIPTION_WEIGHT = 0.8
         const val MAX_SEARCH_RESULTS = 50
     }
+}
+
+@UseExperimental(ExperimentalConfigDsl::class)
+private class Mp3ProviderConfig(config: Config) {
+    val folder by config.serialized<Path> {
+        description = "The folder the MP3s should be taken from"
+        check { path ->
+            if (path == null) "Required"
+            else if (!Files.isDirectory(path)) "Not a directory"
+            else null
+        }
+        serializer = PathSerializer
+        openDirectory()
+    }
+    val recursive by config.boolean {
+        description = "Whether to search the folder recursively"
+        default = false
+    }
+    val customSubject = config.string("DisplayName") {
+        description = "Name to display in clients, defaults to folder name"
+        check { null }
+        uiNode = TextBox
+    }
+
+    val allEntries: List<Config.Entry<*>>
+        get() = listOf(folder, recursive, customSubject)
 }
