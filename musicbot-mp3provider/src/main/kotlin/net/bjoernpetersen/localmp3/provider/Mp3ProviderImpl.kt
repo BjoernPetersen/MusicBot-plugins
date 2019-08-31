@@ -55,12 +55,16 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
     private lateinit var playbackFactory: Mp3PlaybackFactory
     private lateinit var songById: Map<String, Song>
 
-    private var customSubject: Config.StringEntry? = null
+    private lateinit var customSubject: Config.StringEntry
 
     override val name = "Local MP3"
     override val description = "MP3s from some local directory"
-    override val subject
-        get() = customSubject?.get() ?: folder?.get()?.fileName?.toString() ?: name
+    override val subject: String
+        get() {
+            val customSubject = if (this::customSubject.isInitialized) customSubject.get()
+            else null
+            return customSubject ?: folder?.get()?.fileName?.toString() ?: name
+        }
 
     @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
@@ -84,7 +88,7 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
             uiNode = TextBox
         }
 
-        return listOf(folder!!, recursive, customSubject!!)
+        return listOf(folder!!, recursive, customSubject)
     }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
