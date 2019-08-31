@@ -3,7 +3,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version Plugin.SHADOW_JAR
 }
 
-version = "0.2.0-SNAPSHOT"
+version = "0.2.0"
 
 dependencies {
     compileOnly(
@@ -19,19 +19,19 @@ dependencies {
         name = "musicbot",
         version = Lib.MUSICBOT
     )
-    testRuntime(
-        group = "org.slf4j",
-        name = "slf4j-simple",
-        version = Lib.SLF4J
-    )
     testImplementation(
         group = "org.junit.jupiter",
         name = "junit-jupiter-api",
         version = Lib.JUNIT
     )
-    testRuntime(
+    testRuntimeOnly(
         group = "org.junit.jupiter",
         name = "junit-jupiter-engine",
         version = Lib.JUNIT
+    )
+    testRuntimeOnly(
+        group = "org.slf4j",
+        name = "slf4j-simple",
+        version = Lib.SLF4J
     )
 }
