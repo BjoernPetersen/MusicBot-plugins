@@ -7,8 +7,10 @@ import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
 import java.io.File
 import java.io.IOException
 
-internal class JavaFxPlayback @Throws(IOException::class, MediaException::class)
-constructor(file: File) : AbstractPlayback() {
+internal class JavaFxPlayback
+@Throws(IOException::class, MediaException::class) constructor(
+    file: File
+) : AbstractPlayback() {
 
     private val player = MediaPlayer(Media(file.toURI().toURL().toExternalForm())).also {
         it.setOnEndOfMedia { markDone() }
