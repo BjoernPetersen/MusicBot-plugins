@@ -3,7 +3,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version Plugin.SHADOW_JAR
 }
 
-version = "0.1.0-SNAPSHOT"
+version = "0.1.0"
 
 dependencies {
     compileOnly(
@@ -34,5 +34,10 @@ dependencies {
         group = "org.junit.jupiter",
         name = "junit-jupiter-engine",
         version = Lib.JUNIT
+    )
+    testRuntimeOnly(
+        group = "org.slf4j",
+        name = "slf4j-simple",
+        version = Lib.SLF4J
     )
 }
