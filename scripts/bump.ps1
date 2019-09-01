@@ -21,6 +21,9 @@ foreach ($Name in $Names) {
         $NewVersion = $NewVersion + "-SNAPSHOT"
     }
 
+    Write-Host "version = ""$NewVersion"""
+    code "$DirName/build.gradle.kts" --wait
+
     git add $DirName
     git commit -m "Update $Name to $Version"
 }
