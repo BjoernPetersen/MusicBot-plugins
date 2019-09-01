@@ -20,5 +20,4 @@ git push
 git push origin $TagName
 
 gw ":${DirName}:shadowJar"
-$FullDirPath = (Resolve-Path $DirName).Path
-Invoke-Item $FullDirPath\build\libs
+Invoke-Item (Resolve-Path $DirName/build/libs)
