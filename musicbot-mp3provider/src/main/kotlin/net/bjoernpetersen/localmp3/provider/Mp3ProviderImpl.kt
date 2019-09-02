@@ -123,7 +123,12 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
 
     override fun getAlbumArt(songId: String): ImageData? {
         val path = songId.toPath()
-        return loadImage(config.folder.get()!!, path)
+        val basePath = config.folder.get()!!
+        if (!path.normalize().startsWith(basePath.normalize())) {
+            logger.warn { "Tried to load data from restricted file: $path" }
+            return null
+        }
+        return loadImage(path) ?: loadFolderImage(path)
     }
 
     private suspend fun createSong(path: Path): Song? {

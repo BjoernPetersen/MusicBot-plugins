@@ -5,26 +5,23 @@ import com.mpatric.mp3agic.Mp3File
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.spi.image.ImageData
 import java.io.IOException
+import java.nio.file.Files
 import java.nio.file.Path
 
 private val logger = KotlinLogging.logger { }
 
-@Suppress("ReturnCount")
-fun loadImage(basePath: Path, path: Path): ImageData? {
-    if (!path.normalize().startsWith(basePath.normalize())) {
-        logger.warn { "Tried to load data from restricted file: $path" }
-        return null
-    }
-
+fun loadImage(path: Path): ImageData? {
     val mp3File = try {
         Mp3File(path)
     } catch (e: IOException) {
-        return null
+        logger.warn(e) {}
+        null
     } catch (e: BaseException) {
-        return null
+        logger.warn(e) {}
+        null
     }
 
-    if (mp3File.hasId3v2Tag()) {
+    if (mp3File != null && mp3File.hasId3v2Tag()) {
         val tag = mp3File.id3v2Tag
         val image = tag.albumImage
         if (image != null) {
@@ -33,4 +30,33 @@ fun loadImage(basePath: Path, path: Path): ImageData? {
         }
     }
     return null
+}
+
+private val jpgVariants = listOf(
+    "jpg",
+    "jpeg",
+    "JPG",
+    "JPEG"
+)
+
+private val imageFileCandidates by lazy {
+    sequenceOf(
+        "Folder",
+        "Album",
+        "Cover",
+        "AlbumArt",
+        "AlbumArtSmall",
+        "Disc"
+    )
+        .flatMap { sequenceOf(it, it.toLowerCase()) }
+        .flatMap { name -> jpgVariants.asSequence().map { "$name.$it" } }
+}
+
+fun loadFolderImage(path: Path): ImageData? {
+    val parent = path.parent
+    return imageFileCandidates
+        .map { parent.resolve(it) }
+        .firstOrNull { Files.isRegularFile(it) }
+        ?.let { Files.readAllBytes(it) }
+        ?.let { ImageData("image/jpeg", it) }
 }
