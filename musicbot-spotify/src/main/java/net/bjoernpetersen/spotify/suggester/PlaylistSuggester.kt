@@ -51,7 +51,7 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
     private var nextSongs: LinkedList<Song> = LinkedList()
 
     override val name: String = "Spotify playlist"
-    override val description: String = "Plays songs from one of your public Spotify playlists"
+    override val description: String = "Plays songs from one of your Spotify playlists"
     override val subject: String
         get() = playlist?.displayName ?: name
 
