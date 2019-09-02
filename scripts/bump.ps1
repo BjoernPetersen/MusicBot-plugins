@@ -21,9 +21,11 @@ foreach ($Name in $Names) {
         $NewVersion = $NewVersion + "-SNAPSHOT"
     }
 
-    Write-Host "version = ""$NewVersion"""
+    $GradleLine = "`nversion = ""$NewVersion"""
+    Set-Clipboard -Value $GradleLine
+    Write-Host $GradleLine
     code "$DirName/build.gradle.kts" --wait
 
     git add $DirName
-    git commit -m "Update $Name to $Version"
+    git commit -m "Update $Name to $NewVersion"
 }

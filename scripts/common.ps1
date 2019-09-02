@@ -1,5 +1,5 @@
 function gw([String] $GradleArgs) {
-    if ($isWindows) {
+    if ($PSVersionTable.PSVersion.Major -lt 6 -or $isWindows) {
         Return ./gradlew.bat $GradleArgs
     }
     else {
