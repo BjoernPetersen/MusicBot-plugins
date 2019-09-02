@@ -193,6 +193,7 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
         private const val CLIENT_ID = "902fe6b9a4b6421caf88ee01e809939a"
         private val SCOPES = listOf(
             "user-read-private",
+            "user-library-read",
             "user-modify-playback-state",
             "user-read-playback-state",
             "playlist-read-private",

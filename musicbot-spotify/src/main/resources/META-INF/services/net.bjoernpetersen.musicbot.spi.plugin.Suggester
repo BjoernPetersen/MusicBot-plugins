@@ -1,3 +1,4 @@
 net.bjoernpetersen.spotify.suggester.PlaylistSuggester
 net.bjoernpetersen.spotify.suggester.SongRepeatSuggester
 net.bjoernpetersen.spotify.suggester.RecommendationSuggester
+net.bjoernpetersen.spotify.suggester.SavedTracksSuggester
