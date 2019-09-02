@@ -12,7 +12,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version Plugin.SHADOW_JAR
 }
 
-version = "0.17.0"
+version = "0.18.0-SNAPSHOT"
 
 tasks {
     "dokka"(DokkaTask::class) {
