@@ -28,13 +28,17 @@ import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AacPlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.AacStreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AviPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.ExperimentalVideoFilePlayback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.FlacPlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.FlacStreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.MkvPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3PlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3StreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp4PlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WavePlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.WaveStreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WmvPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.util.FileStorage
 import net.bjoernpetersen.musicbot.youtube.playback.YouTubePlaybackFactory
@@ -42,6 +46,7 @@ import net.bjoernpetersen.musicbot.youtube.playback.YouTubeResource
 import java.io.BufferedWriter
 import java.io.File
 import java.io.IOException
+import java.net.URL
 import java.nio.ByteBuffer
 import java.nio.CharBuffer
 import java.time.Duration
@@ -62,6 +67,10 @@ class MpvPlaybackFactory :
     MkvPlaybackFactory,
     Mp4PlaybackFactory,
     WmvPlaybackFactory,
+    AacStreamPlaybackFactory,
+    FlacStreamPlaybackFactory,
+    Mp3StreamPlaybackFactory,
+    WaveStreamPlaybackFactory,
     CoroutineScope by PluginScope(Dispatchers.IO) {
 
     override val name: String = "mpv"
@@ -118,6 +127,17 @@ class MpvPlaybackFactory :
             MpvPlayback(
                 cmdFileDir,
                 "ytdl://$videoId",
+                config
+            )
+        }
+    }
+
+    override suspend fun createPlayback(streamLocation: URL): Playback {
+        logger.debug { "Creating playback for URL $streamLocation" }
+        return withContext(coroutineContext) {
+            MpvPlayback(
+                cmdFileDir,
+                streamLocation.toExternalForm(),
                 config
             )
         }
