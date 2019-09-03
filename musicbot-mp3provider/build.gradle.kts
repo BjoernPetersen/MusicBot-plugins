@@ -24,7 +24,6 @@ dependencies {
         name = "fuzzywuzzy",
         version = Lib.FUZZYWUZZY
     )
-    implementation(group = "org.xerial", name = "sqlite-jdbc", version = Lib.SQLITE)
 
     testImplementation(
         group = "com.github.bjoernpetersen",
