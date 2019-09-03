@@ -51,11 +51,6 @@ dependencies {
     }
 
     testImplementation(
-        group = "org.slf4j",
-        name = "slf4j-simple",
-        version = Lib.SLF4J
-    )
-    testImplementation(
         group = "com.github.bjoernpetersen",
         name = "musicbot",
         version = Lib.MUSICBOT
@@ -69,5 +64,10 @@ dependencies {
         group = "org.junit.jupiter",
         name = "junit-jupiter-engine",
         version = Lib.JUNIT
+    )
+    testRuntimeOnly(
+        group = "org.slf4j",
+        name = "slf4j-simple",
+        version = Lib.SLF4J
     )
 }

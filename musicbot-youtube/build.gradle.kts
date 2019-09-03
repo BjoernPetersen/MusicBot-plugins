@@ -85,6 +85,11 @@ dependencies {
         name = "junit-jupiter-engine",
         version = Lib.JUNIT
     )
+    testRuntimeOnly(
+        group = "org.slf4j",
+        name = "slf4j-simple",
+        version = Lib.SLF4J
+    )
 }
 
 publishing {
