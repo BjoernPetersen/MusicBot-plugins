@@ -37,6 +37,8 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.MkvPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3PlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3StreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp4PlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.VorbisPlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.VorbisStreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WavePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WaveStreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WmvPlaybackFactory
@@ -61,6 +63,7 @@ class MpvPlaybackFactory :
     AacPlaybackFactory,
     FlacPlaybackFactory,
     Mp3PlaybackFactory,
+    VorbisPlaybackFactory,
     WavePlaybackFactory,
     YouTubePlaybackFactory,
     AviPlaybackFactory,
@@ -70,6 +73,7 @@ class MpvPlaybackFactory :
     AacStreamPlaybackFactory,
     FlacStreamPlaybackFactory,
     Mp3StreamPlaybackFactory,
+    VorbisStreamPlaybackFactory,
     WaveStreamPlaybackFactory,
     CoroutineScope by PluginScope(Dispatchers.IO) {
 
