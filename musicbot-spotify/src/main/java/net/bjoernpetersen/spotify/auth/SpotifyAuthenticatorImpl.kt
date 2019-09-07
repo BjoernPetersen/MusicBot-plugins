@@ -2,7 +2,6 @@ package net.bjoernpetersen.spotify.auth
 
 import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import io.ktor.http.encodeURLParameter
-import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -34,7 +33,6 @@ import java.time.format.FormatStyle
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-@KtorExperimentalAPI
 class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
 
     private val logger = KotlinLogging.logger { }

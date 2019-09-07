@@ -24,7 +24,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
-@KtorExperimentalAPI
+@UseExperimental(KtorExperimentalAPI::class)
 internal class KtorCallback(private val port: Int) {
 
     val callbackUrl = URL("http", LOCALHOST, port, CALLBACK_PATH)
