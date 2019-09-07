@@ -29,7 +29,10 @@ dependencies {
         group = "com.github.bjoernpetersen",
         name = "m3u-parser",
         version = Lib.M3U_PARSER
-    )
+    ) {
+        exclude("org.jetbrains.kotlin")
+        exclude("org.slf4j")
+    }
     implementation(
         group = "me.xdrop",
         name = "fuzzywuzzy",
