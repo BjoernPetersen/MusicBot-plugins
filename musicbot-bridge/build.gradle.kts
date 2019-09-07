@@ -1,9 +1,21 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     kotlin("jvm")
     id("com.github.johnrengelman.shadow") version Plugin.SHADOW_JAR
 }
 
 version = "0.2.0-SNAPSHOT"
+
+tasks {
+    val shadowJar by getting(ShadowJar::class) {
+        dependsOn("relocateDependencies")
+    }
+    create<ConfigureShadowRelocation>("relocateDependencies") {
+        target = shadowJar
+    }
+}
 
 dependencies {
     compileOnly(

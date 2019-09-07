@@ -1,5 +1,6 @@
-import org.gradle.kotlin.dsl.version
 import org.jetbrains.dokka.gradle.DokkaTask
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     kotlin("jvm")
@@ -45,6 +46,13 @@ tasks {
     val sourcesJar by creating(Jar::class) {
         archiveClassifier.set("sources")
         from(sourceSets["main"].allSource)
+    }
+
+    val shadowJar by getting(ShadowJar::class) {
+        dependsOn("relocateDependencies")
+    }
+    create<ConfigureShadowRelocation>("relocateDependencies") {
+        target = shadowJar
     }
 }
 
