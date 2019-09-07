@@ -5,12 +5,6 @@ plugins {
 
 version = "0.9.0-SNAPSHOT"
 
-tasks {
-    shadowJar {
-        relocate("com", "shadow.com")
-    }
-}
-
 dependencies {
     compileOnly(
         group = "com.github.bjoernpetersen",
