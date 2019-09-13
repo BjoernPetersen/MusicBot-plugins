@@ -36,7 +36,6 @@ dependencies {
         name = "fuzzywuzzy",
         version = Lib.FUZZYWUZZY
     )
-    implementation(group = "org.xerial", name = "sqlite-jdbc", version = Lib.SQLITE)
 
     testImplementation(
         group = "com.github.bjoernpetersen",
@@ -58,4 +57,5 @@ dependencies {
         name = "slf4j-simple",
         version = Lib.SLF4J
     )
+    testRuntimeOnly(group = "org.xerial", name = "sqlite-jdbc", version = Lib.SQLITE)
 }
