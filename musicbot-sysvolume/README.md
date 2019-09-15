@@ -5,7 +5,8 @@ or using native access.
 
 ## Config
 
-The native access plugin requires no configuration, but it's Windows-only.
+The native access plugin requires no configuration. If you're using it,
+you can ignore the rest of this document.
 
 The CLI commands to access and change the master volume are highly system dependent.
 You need to provide the commands and an extraction regex pattern in order for this plugin
