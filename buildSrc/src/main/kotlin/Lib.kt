@@ -23,6 +23,9 @@ object Lib {
     // Spotify
     const val SPOTIFY = "2.2.0"
 
+    // sysvolume
+    const val VOLCTL = "1.0.0"
+
     // YouTube
     const val YOUTUBE_API = "v3-rev20190813-1.30.1"
     const val CAFFEINE = "2.8.0"

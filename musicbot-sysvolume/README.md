@@ -1,8 +1,11 @@
 # MusicBot-sysvolume
 
-Provides system master volume control by calling CLI commands.
+Provides system master volume control by either calling CLI commands
+or using native access.
 
 ## Config
+
+The native access plugin requires no configuration, but it's Windows-only.
 
 The CLI commands to access and change the master volume are highly system dependent.
 You need to provide the commands and an extraction regex pattern in order for this plugin

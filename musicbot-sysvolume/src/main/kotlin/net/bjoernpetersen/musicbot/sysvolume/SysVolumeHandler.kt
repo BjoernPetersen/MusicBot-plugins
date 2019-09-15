@@ -12,9 +12,9 @@ import net.bjoernpetersen.musicbot.spi.plugin.volume.VolumeHandler
 import kotlin.coroutines.CoroutineContext
 
 class SysVolumeHandler : VolumeHandler, CoroutineScope {
-    override val name: String = "System master volume control"
-    override val description: String = "Controls the system's master volume by calling" +
-        " a custom command."
+    override val name: String = "CLI System master volume control"
+    override val description: String =
+        "Controls the system's master volume by calling a custom command."
 
     private val job = Job()
     override val coroutineContext: CoroutineContext
