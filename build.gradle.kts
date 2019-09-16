@@ -9,6 +9,14 @@ plugins {
     idea
 }
 
+tasks {
+    dependencyUpdates {
+        rejectVersionIf {
+            isUnstable(candidate.version, currentVersion)
+        }
+    }
+}
+
 allprojects {
     group = "com.github.bjoernpetersen"
 

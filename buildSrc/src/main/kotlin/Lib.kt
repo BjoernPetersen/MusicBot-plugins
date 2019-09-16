@@ -4,9 +4,9 @@ object Lib {
     const val MUSICBOT = "0.24.0-SNAPSHOT"
 
     const val SLF4J = "1.8.0-beta4"
-    const val JUNIT = "5.5.1"
+    const val JUNIT = "5.5.2"
 
-    const val KTOR = "1.2.2"
+    const val KTOR = "1.2.4"
 
     // Mp3Provider
     const val ID3_TAG = "0.9.1"
