@@ -20,7 +20,9 @@ class NativeVolumeHandler : VolumeHandler {
     override fun createStateEntries(state: Config) = Unit
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
-        volumeControl = VolumeControl()
+        withContext(Dispatchers.IO) {
+            volumeControl = VolumeControl.newInstanceWithClassLoaderSupport()
+        }
     }
 
     override suspend fun getVolume(): Int {
