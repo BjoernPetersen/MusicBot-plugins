@@ -7,7 +7,7 @@ import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.volume.VolumeHandler
 import net.bjoernpetersen.volctl.VolumeControl
 
-class NativeVolumeHandler : VolumeHandler {
+class NativeSysVolumeHandler : VolumeHandler {
     override val name: String =
         "Native system master volume control"
     override val description: String =

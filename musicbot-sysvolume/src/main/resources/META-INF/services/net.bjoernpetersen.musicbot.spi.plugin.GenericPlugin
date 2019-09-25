@@ -1,2 +1,1 @@
-net.bjoernpetersen.musicbot.sysvolume.NativeVolumeHandler
-net.bjoernpetersen.musicbot.sysvolume.SysVolumeHandler
+net.bjoernpetersen.musicbot.sysvolume.NativeSysVolumeHandler
