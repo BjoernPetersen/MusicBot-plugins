@@ -10,16 +10,17 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
-import net.bjoernpetersen.musicbot.api.config.ActionButton
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
 import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.IntSerializer
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.NumberBox
 import net.bjoernpetersen.musicbot.api.config.PasswordBox
 import net.bjoernpetersen.musicbot.api.config.SerializationException
+import net.bjoernpetersen.musicbot.api.config.actionButton
+import net.bjoernpetersen.musicbot.api.config.serialization
 import net.bjoernpetersen.musicbot.api.config.serialized
+import net.bjoernpetersen.musicbot.api.config.string
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
@@ -36,7 +37,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import javax.inject.Inject
 
-@UseExperimental(ObsoleteCoroutinesApi::class)
+@UseExperimental(ObsoleteCoroutinesApi::class, ExperimentalConfigDsl::class)
 class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
     CoroutineScope by PluginScope(newSingleThreadContext("SpotifyAuth")) {
 
@@ -133,7 +134,6 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
         }
     }
 
-    @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
         port = config.serialized("port") {
             description = "OAuth callback port"
@@ -146,41 +146,51 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
     }
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> {
-        tokenExpiration = secrets.SerializedEntry(
-            "tokenExpiration",
-            "Token expiration date",
-            InstantSerializer,
-            NonnullConfigChecker,
-            ActionButton("Refresh", ::toTimeString) {
-                withContext(coroutineContext) {
-                    try {
-                        val token = authorize()
-                        currentToken = token
-                        true
-                    } catch (e: IOException) {
-                        logger.error(e) {}
-                        false
-                    } catch (e: SpotifyWebApiException) {
-                        logger.error(e) {}
-                        false
+        tokenExpiration = secrets.serialized("tokenExpiration") {
+            description = "Token expiration date"
+            check(NonnullConfigChecker)
+            serialization {
+                serialize { it.epochSecond.toString() }
+                deserialize {
+                    it.toLongOrNull()?.let(Instant::ofEpochSecond) ?: throw SerializationException()
+                }
+            }
+            actionButton {
+                label = "Refresh"
+                describe {
+                    DateTimeFormatter
+                        .ofLocalizedTime(FormatStyle.SHORT)
+                        .format(ZonedDateTime.ofInstant(it, ZoneId.systemDefault()))
+                }
+                action {
+                    withContext(coroutineContext) {
+                        try {
+                            val token = authorize()
+                            currentToken = token
+                            true
+                        } catch (e: IOException) {
+                            logger.error(e) {}
+                            false
+                        } catch (e: SpotifyWebApiException) {
+                            logger.error(e) {}
+                            false
+                        }
                     }
                 }
-            })
+            }
+        }
 
-        accessToken = secrets.StringEntry(
-            "accessToken",
-            "OAuth access token",
-            { null },
-            null
-        )
+        accessToken = secrets.string("accessToken") {
+            description = "OAuth access token"
+            check { null }
+        }
 
-        clientId = secrets.StringEntry(
-            key = "clientId",
-            description = "OAuth client ID. Only required if there is a custom port.",
-            configChecker = { null },
-            uiNode = PasswordBox,
-            default = CLIENT_ID
-        )
+        clientId = secrets.string("clientId") {
+            description = "OAuth client ID. Only required if there is a custom port."
+            check { null }
+            uiNode = PasswordBox
+            default(CLIENT_ID)
+        }
 
         return listOf(tokenExpiration, clientId)
     }
@@ -206,23 +216,10 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
         const val DEFAULT_PORT = 58642
         const val MIN_PORT = 1024
         const val MAX_PORT = 65535
-
-        private fun toTimeString(instant: Instant) = DateTimeFormatter
-            .ofLocalizedTime(FormatStyle.SHORT)
-            .format(ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()))
     }
 }
 
 private val random = SecureRandom()
 private fun generateRandomString(): String {
     return random.nextInt(Int.MAX_VALUE).toString()
-}
-
-private object InstantSerializer : ConfigSerializer<Instant> {
-    @Throws(SerializationException::class)
-    override fun deserialize(string: String): Instant {
-        return string.toLongOrNull()?.let(Instant::ofEpochSecond) ?: throw SerializationException()
-    }
-
-    override fun serialize(obj: Instant): String = obj.epochSecond.toString()
 }
