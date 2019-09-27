@@ -14,7 +14,7 @@ import kotlinx.io.errors.IOException
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
 import net.bjoernpetersen.musicbot.spi.plugin.PlaybackState
-import net.bjoernpetersen.spotify.auth.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import java.time.Duration
 
 internal class SpotifyPlayback(

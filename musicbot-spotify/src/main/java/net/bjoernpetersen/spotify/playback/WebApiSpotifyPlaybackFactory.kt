@@ -6,20 +6,18 @@ import kotlinx.coroutines.Job
 import kotlinx.io.errors.IOException
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.plugin.Base
+import net.bjoernpetersen.musicbot.api.loader.NoResource
+import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
-import net.bjoernpetersen.musicbot.spi.plugin.PlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
-import net.bjoernpetersen.spotify.auth.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyPlaybackFactory
 import net.bjoernpetersen.spotify.control.SpotifyControl
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-@Base
-class SpotifyPlaybackFactory : PlaybackFactory, CoroutineScope {
-
-    // TODO create base interface
+class WebApiSpotifyPlaybackFactory : SpotifyPlaybackFactory, CoroutineScope {
 
     private val logger = KotlinLogging.logger { }
 
@@ -32,12 +30,11 @@ class SpotifyPlaybackFactory : PlaybackFactory, CoroutineScope {
     @Inject
     private lateinit var control: SpotifyControl
 
-    override val name: String = "Spotify"
-    override val description: String = "Plays Spotify songs with an official Spotify client on " +
-        "a possibly remote device. Requires a Spotify Premium subscription."
+    override val name: String = "Remote control"
+    override val description: String =
+        "Remotely controls an official client. Requires a Spotify Premium subscription."
 
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> = emptyList()
-
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
     override fun createStateEntries(state: Config) = Unit
 
@@ -53,7 +50,9 @@ class SpotifyPlaybackFactory : PlaybackFactory, CoroutineScope {
         }
     }
 
-    suspend fun getPlayback(songId: String): Playback {
+    override suspend fun loadSong(songId: String): Resource = NoResource
+
+    override suspend fun getPlayback(songId: String, resource: Resource): Playback {
         return SpotifyPlayback(authenticator, control.deviceId, songId)
     }
 

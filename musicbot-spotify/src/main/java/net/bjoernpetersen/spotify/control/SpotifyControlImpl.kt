@@ -16,7 +16,7 @@ import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
-import net.bjoernpetersen.spotify.auth.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 

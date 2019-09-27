@@ -15,16 +15,16 @@ import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.cache.AsyncLoader
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.loader.NoResource
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
-import net.bjoernpetersen.spotify.auth.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyPlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
 import net.bjoernpetersen.spotify.marketFromToken
-import net.bjoernpetersen.spotify.playback.SpotifyPlaybackFactory
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -43,8 +43,8 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.IO + job
 
-    override val name: String = "Spotify"
-    override val description: String = "Provides songs from Spotify"
+    override val name: String = "Official"
+    override val description: String = "Official plugin using the Spotify Web API"
     override val subject: String = "Spotify"
 
     private lateinit var songCache: LoadingCache<String, Deferred<Song>>
@@ -71,10 +71,10 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
     }
 
     override suspend fun supplyPlayback(song: Song, resource: Resource): Playback {
-        return spotifyPlaybackFactory.getPlayback(song.id)
+        return spotifyPlaybackFactory.getPlayback(song.id, resource)
     }
 
-    override suspend fun loadSong(song: Song): Resource = NoResource
+    override suspend fun loadSong(song: Song): Resource = spotifyPlaybackFactory.loadSong(song.id)
 
     override suspend fun close() {
         job.cancel()
@@ -123,7 +123,7 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
         }
     }
 
-    override fun trackToSong(track: Track): Song {
+    private fun trackToSong(track: Track): Song {
         val id = track.id
         val title = track.name
         val description = track.artists.asSequence()

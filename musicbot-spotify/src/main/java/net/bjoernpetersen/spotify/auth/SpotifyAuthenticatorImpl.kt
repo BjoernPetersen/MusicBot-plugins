@@ -4,8 +4,9 @@ import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import io.ktor.http.encodeURLParameter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
@@ -19,7 +20,10 @@ import net.bjoernpetersen.musicbot.api.config.NumberBox
 import net.bjoernpetersen.musicbot.api.config.PasswordBox
 import net.bjoernpetersen.musicbot.api.config.SerializationException
 import net.bjoernpetersen.musicbot.api.config.serialized
+import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.util.BrowserOpener
 import java.io.IOException
 import java.net.MalformedURLException
@@ -31,19 +35,15 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
-class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
+@UseExperimental(ObsoleteCoroutinesApi::class)
+class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
+    CoroutineScope by PluginScope(newSingleThreadContext("SpotifyAuth")) {
 
     private val logger = KotlinLogging.logger { }
 
-    override val name: String = "Spotify Auth"
-    override suspend fun getToken(): String = currentToken()!!.value
-
-    private val job = Job()
-    @Suppress("EXPERIMENTAL_API_USAGE")
-    override val coroutineContext: CoroutineContext
-        get() = newSingleThreadContext(name) + job
+    override val name: String = "Desktop OAuth"
+    override val description: String = "Performs Implicit Grant OAuth flow by opening a browser"
 
     @Inject
     private lateinit var browserOpener: BrowserOpener
@@ -60,16 +60,21 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
             accessToken.set(value?.value)
         }
 
-    private suspend fun currentToken(): Token? {
+    override suspend fun getToken(): String {
         return withContext(coroutineContext) {
             val current = currentToken
-            if (current == null) {
-                currentToken = initAuth()
-            } else if (current.isExpired()) {
-                currentToken = authorize()
+            val refreshed = when {
+                current == null -> initAuth()
+                current.isExpired() -> authorize()
+                else -> current
             }
-            currentToken
+            currentToken = refreshed
+            refreshed.value
         }
+    }
+
+    override fun invalidateToken() {
+        currentToken = null
     }
 
     private suspend fun initAuth(): Token {
@@ -113,10 +118,10 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
                 callbackJob.await()
             } catch (e: TimeoutTokenException) {
                 logger.error { "No token received within one minute" }
-                throw IOException(e)
+                throw TokenRefreshException(e)
             } catch (e: InvalidTokenException) {
                 logger.error(e) { "Invalid token response received" }
-                throw IOException(e)
+                throw TokenRefreshException(e)
             }
         }
     }
@@ -124,7 +129,7 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Retrieving token...")
         withContext(coroutineContext) {
-            currentToken().also { initStateWriter.state("Retrieved token.") }
+            getToken().also { initStateWriter.state("Retrieved token.") }
         }
     }
 
@@ -183,7 +188,7 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator, CoroutineScope {
     override fun createStateEntries(state: Config) = Unit
 
     override suspend fun close() {
-        job.cancel()
+        run { cancel() }
     }
 
     private companion object {

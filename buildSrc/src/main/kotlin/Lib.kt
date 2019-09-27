@@ -14,7 +14,6 @@ object Lib {
     const val SQLITE = "3.28.0"
 
     // mpv
-    const val YOUTUBE_PROVIDER = "0.16.0"
     const val NU_PROCESS = "1.2.4"
 
     // Radio

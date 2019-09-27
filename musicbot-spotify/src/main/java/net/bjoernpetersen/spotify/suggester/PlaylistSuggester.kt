@@ -21,9 +21,9 @@ import net.bjoernpetersen.musicbot.spi.plugin.BrokenSuggesterException
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
-import net.bjoernpetersen.spotify.auth.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
 import net.bjoernpetersen.spotify.marketFromToken
-import net.bjoernpetersen.spotify.provider.SpotifyProvider
 import java.util.LinkedList
 import javax.inject.Inject
 import kotlin.math.max

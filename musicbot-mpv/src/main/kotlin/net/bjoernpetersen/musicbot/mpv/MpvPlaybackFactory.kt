@@ -21,8 +21,10 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
+import net.bjoernpetersen.musicbot.api.loader.NoResource
 import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
+import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
@@ -42,9 +44,8 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.VorbisStreamPlaybackFac
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WavePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WaveStreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WmvPlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.util.FileStorage
-import net.bjoernpetersen.musicbot.youtube.playback.YouTubePlaybackFactory
-import net.bjoernpetersen.musicbot.youtube.playback.YouTubeResource
 import java.io.BufferedWriter
 import java.io.File
 import java.io.IOException
@@ -123,9 +124,8 @@ class MpvPlaybackFactory :
         }
     }
 
-    override suspend fun load(videoId: String): YouTubeResource = NoYouTubeResource(videoId)
-    override suspend fun createPlayback(resource: YouTubeResource): Playback {
-        val videoId = resource.videoId
+    override suspend fun load(videoId: String): Resource = NoResource
+    override suspend fun createPlayback(videoId: String, resource: Resource): Playback {
         logger.debug { "Creating playback for $videoId" }
         return withContext(coroutineContext) {
             MpvPlayback(
@@ -380,11 +380,4 @@ private class MpvPlayback(
         const val STATE_CHECK_MILLIS: Long = 4000
         const val EXIT_TIMEOUT_MILLIS: Long = 5000
     }
-}
-
-private class NoYouTubeResource(videoId: String) : YouTubeResource(videoId) {
-    override val isValid: Boolean
-        get() = true
-
-    override suspend fun free() = Unit
 }

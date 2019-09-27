@@ -1,1 +1,1 @@
-net.bjoernpetersen.spotify.playback.SpotifyPlaybackFactory
+net.bjoernpetersen.spotify.playback.WebApiSpotifyPlaybackFactory

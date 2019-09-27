@@ -12,7 +12,7 @@ import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
-import net.bjoernpetersen.spotify.provider.SpotifyProvider
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 

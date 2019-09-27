@@ -12,8 +12,8 @@ import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.plugin.volume.Volume
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.volume.VolumeHandler
-import net.bjoernpetersen.spotify.auth.SpotifyAuthenticator
 import net.bjoernpetersen.spotify.control.SpotifyControl
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -21,8 +21,8 @@ import kotlin.coroutines.CoroutineContext
 class SpotifyVolumeHandler : VolumeHandler, CoroutineScope {
     private val logger = KotlinLogging.logger { }
 
-    override val name: String = "Spotify volume handler"
-    override val description: String = "Controls the volume of a Spotify client"
+    override val name: String = "Spotify client volume"
+    override val description: String = "Remotely controls the volume of a Spotify client"
 
     private val job = Job()
     override val coroutineContext: CoroutineContext

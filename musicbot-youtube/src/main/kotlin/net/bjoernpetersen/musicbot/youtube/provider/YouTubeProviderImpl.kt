@@ -16,8 +16,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
-import net.bjoernpetersen.musicbot.api.config.PasswordBox
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
@@ -25,9 +23,10 @@ import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubePlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeProvider
 import net.bjoernpetersen.musicbot.youtube.cache.AsyncLoader
-import net.bjoernpetersen.musicbot.youtube.playback.YouTubePlaybackFactory
-import net.bjoernpetersen.musicbot.youtube.playback.YouTubeResource
 import java.io.IOException
 import java.time.Duration
 import java.util.ArrayList
@@ -38,38 +37,27 @@ import kotlin.math.min
 
 @Suppress("TooManyFunctions")
 class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispatchers.IO) {
+    override val name: String
+        get() = "Official"
     override val description: String
-        get() = "Provides YouTube videos/songs"
+        get() = "Uses the YouTube Data API v3"
     override val subject: String
-        get() = name
+        get() = "YouTube"
 
     private val logger = KotlinLogging.logger { }
 
-    private lateinit var apiKeyEntry: Config.StringEntry
-    override val apiKey: String
-        get() = apiKeyEntry.get()!!
-
     @Inject
     private lateinit var playback: YouTubePlaybackFactory
-    override lateinit var api: YouTube
-        private set
+    @Inject
+    private lateinit var auth: YouTubeAuthenticator
+    private lateinit var api: YouTube
 
     private lateinit var songCache: LoadingCache<String, Deferred<Song?>>
     private lateinit var searchCache: LoadingCache<String, Deferred<List<Song>?>>
 
     override fun createStateEntries(state: Config) = Unit
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> = emptyList()
-
-    override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> {
-        apiKeyEntry = secrets.StringEntry(
-            "apiKey",
-            "YouTube API key",
-            NonnullConfigChecker,
-            PasswordBox
-        )
-
-        return listOf(apiKeyEntry)
-    }
+    override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
 
     @Suppress("MagicNumber")
     override suspend fun initialize(initStateWriter: InitStateWriter) {
@@ -119,7 +107,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
                         val idsString = partition.joinToString(",") { pair -> pair.value }
 
                         val videos: List<Video> = api.videos().list(VIDEO_RESULT_PARTS)
-                            .setKey(apiKey)
+                            .setKey(auth.getToken())
                             .setId(idsString)
                             .execute()
                             .items
@@ -181,7 +169,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
         val searchResults: List<SearchResult> = try {
             withContext(coroutineContext) {
                 api.search().list(SEARCH_RESULT_PARTS)
-                    .setKey(apiKey)
+                    .setKey(auth.getToken())
                     .setQ(query)
                     .setType(SEARCH_TYPE)
                     .setMaxResults(BATCH_LOOKUP_MAX.toLong())
@@ -213,7 +201,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
         val results: List<Video> = try {
             withContext(coroutineContext) {
                 api.videos().list(VIDEO_RESULT_PARTS)
-                    .setKey(apiKey)
+                    .setKey(auth.getToken())
                     .setId(id)
                     .execute()
                     .items
@@ -237,7 +225,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
     }
 
     override suspend fun supplyPlayback(song: Song, resource: Resource): Playback {
-        return playback.createPlayback(resource as YouTubeResource)
+        return playback.createPlayback(song.id, resource)
     }
 
     override suspend fun close() {

@@ -15,14 +15,6 @@ dependencies {
     }
 
     implementation(
-        group = "com.github.bjoernpetersen",
-        name = "musicbot-youtube",
-        version = Lib.YOUTUBE_PROVIDER
-    ) {
-        isChanging = Lib.YOUTUBE_PROVIDER.contains("SNAPSHOT")
-    }
-
-    implementation(
         group = "com.zaxxer",
         name = "nuprocess",
         version = Lib.NU_PROCESS
