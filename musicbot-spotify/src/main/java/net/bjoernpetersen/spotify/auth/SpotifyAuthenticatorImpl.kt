@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import javax.inject.Inject
 
+@Suppress("TooManyFunctions")
 @UseExperimental(ObsoleteCoroutinesApi::class, ExperimentalConfigDsl::class)
 class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
     CoroutineScope by PluginScope(newSingleThreadContext("SpotifyAuth")) {
