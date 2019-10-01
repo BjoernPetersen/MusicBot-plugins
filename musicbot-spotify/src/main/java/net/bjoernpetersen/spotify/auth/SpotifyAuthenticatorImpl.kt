@@ -104,7 +104,7 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
                     "client_id=$CLIENT_ID",
                     "redirect_uri=${redirectUrl.toExternalForm().encodeURLParameter()}",
                     "response_type=token",
-                    "scope=${SCOPES.joinToString(" ").encodeURLParameter()}",
+                    "scope=${scopes.joinToString(" ").encodeURLParameter()}",
                     "state=$state"
                 ).joinToString("&", prefix = "$base?")
             })
@@ -212,14 +212,6 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
     private companion object {
         private const val SPOTIFY_URL = " https://accounts.spotify.com/authorize"
         private const val CLIENT_ID = "902fe6b9a4b6421caf88ee01e809939a"
-        private val SCOPES = listOf(
-            "user-read-private",
-            "user-library-read",
-            "user-modify-playback-state",
-            "user-read-playback-state",
-            "playlist-read-private",
-            "playlist-read-collaborative"
-        )
 
         const val DEFAULT_PORT = 58642
         const val MIN_PORT = 1024
