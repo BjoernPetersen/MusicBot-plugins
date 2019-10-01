@@ -17,6 +17,7 @@ import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -59,6 +60,7 @@ class SpotifyControlImpl : SpotifyControl, CoroutineScope {
     }
 
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
+        authenticator.requireScopes(SpotifyScope.USER_READ_PLAYBACK_STATE)
         device = config.SerializedEntry(
             "device",
             "Spotify device to use",

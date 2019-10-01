@@ -22,6 +22,7 @@ import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.spotify.marketFromToken
 import java.util.LinkedList
 import javax.inject.Inject
@@ -68,7 +69,9 @@ class SavedTracksSuggester : Suggester, CoroutineScope by PluginScope(Dispatcher
         return emptyList()
     }
 
-    override fun createStateEntries(state: Config) = Unit
+    override fun createStateEntries(state: Config) {
+        auth.requireScopes(SpotifyScope.USER_LIBRARY_READ)
+    }
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         withContext(coroutineContext) {

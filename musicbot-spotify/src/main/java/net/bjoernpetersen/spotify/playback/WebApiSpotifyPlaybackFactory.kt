@@ -13,6 +13,7 @@ import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyPlaybackFactory
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.spotify.control.SpotifyControl
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -36,7 +37,12 @@ class WebApiSpotifyPlaybackFactory : SpotifyPlaybackFactory, CoroutineScope {
 
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> = emptyList()
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
-    override fun createStateEntries(state: Config) = Unit
+    override fun createStateEntries(state: Config) {
+        authenticator.requireScopes(
+            SpotifyScope.USER_MODIFY_PLAYBACK_STATE,
+            SpotifyScope.USER_READ_PLAYBACK_STATE
+        )
+    }
 
     @Throws(InitializationException::class)
     override suspend fun initialize(initStateWriter: InitStateWriter) {

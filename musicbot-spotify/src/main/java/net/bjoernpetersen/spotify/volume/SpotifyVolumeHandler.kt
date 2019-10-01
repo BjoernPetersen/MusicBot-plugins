@@ -13,6 +13,7 @@ import net.bjoernpetersen.musicbot.api.plugin.volume.Volume
 import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.musicbot.spi.plugin.volume.VolumeHandler
 import net.bjoernpetersen.spotify.control.SpotifyControl
 import javax.inject.Inject
@@ -75,7 +76,12 @@ class SpotifyVolumeHandler : VolumeHandler, CoroutineScope {
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
 
-    override fun createStateEntries(state: Config) = Unit
+    override fun createStateEntries(state: Config) {
+        auth.requireScopes(
+            SpotifyScope.USER_READ_PLAYBACK_STATE,
+            SpotifyScope.USER_MODIFY_PLAYBACK_STATE
+        )
+    }
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Trying to access client...")

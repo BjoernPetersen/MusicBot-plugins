@@ -25,6 +25,7 @@ import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.musicbot.spi.util.BrowserOpener
 import java.io.IOException
 import java.net.MalformedURLException
@@ -52,6 +53,8 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
     private lateinit var port: Config.SerializedEntry<Int>
     private lateinit var clientId: Config.StringEntry
 
+    private val scopes: MutableSet<SpotifyScope> = HashSet(SpotifyScope.values().size * 2)
+
     private lateinit var tokenExpiration: Config.SerializedEntry<Instant>
     private lateinit var accessToken: Config.StringEntry
     private var currentToken: Token? = null
@@ -60,6 +63,10 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
             tokenExpiration.set(value?.expiration)
             accessToken.set(value?.value)
         }
+
+    override fun requireScopes(vararg scopes: SpotifyScope) {
+        this.scopes.addAll(scopes)
+    }
 
     override suspend fun getToken(): String {
         return withContext(coroutineContext) {

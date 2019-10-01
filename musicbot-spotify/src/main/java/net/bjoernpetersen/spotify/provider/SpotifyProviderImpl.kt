@@ -24,6 +24,7 @@ import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
+import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.spotify.marketFromToken
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -51,7 +52,9 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
 
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> = emptyList()
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
-    override fun createStateEntries(state: Config) = Unit
+    override fun createStateEntries(state: Config) {
+        authenticator.requireScopes(SpotifyScope.USER_READ_PRIVATE)
+    }
 
     private suspend fun getApi(): SpotifyApi {
         return SpotifyApi.builder()
