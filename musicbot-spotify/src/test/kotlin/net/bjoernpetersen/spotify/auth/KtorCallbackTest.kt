@@ -7,6 +7,9 @@ import io.ktor.client.request.parameter
 import io.ktor.client.response.HttpResponse
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.url
+import java.time.Duration
+import java.util.LinkedList
+import java.util.function.Supplier
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
@@ -21,9 +24,6 @@ import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
-import java.time.Duration
-import java.util.LinkedList
-import java.util.function.Supplier
 
 @KtorExperimentalAPI
 @ExtendWith(PortExtension::class)

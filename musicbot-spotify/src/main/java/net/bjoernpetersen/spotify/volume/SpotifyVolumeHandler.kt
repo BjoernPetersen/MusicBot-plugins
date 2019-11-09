@@ -2,6 +2,8 @@ package net.bjoernpetersen.spotify.volume
 
 import com.wrapper.spotify.SpotifyApi
 import com.wrapper.spotify.exceptions.SpotifyWebApiException
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,8 +18,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenti
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.musicbot.spi.plugin.volume.VolumeHandler
 import net.bjoernpetersen.spotify.control.SpotifyControl
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 class SpotifyVolumeHandler : VolumeHandler, CoroutineScope {
     private val logger = KotlinLogging.logger { }

@@ -6,6 +6,10 @@ import com.google.common.collect.Lists
 import com.wrapper.spotify.SpotifyApi
 import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import com.wrapper.spotify.model_objects.specification.Track
+import java.io.IOException
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -26,10 +30,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyPlayback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.spotify.marketFromToken
-import java.io.IOException
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 @Suppress("TooManyFunctions")
 class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {

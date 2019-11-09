@@ -1,5 +1,11 @@
 package net.bjoernpetersen.localmp3.provider
 
+import java.nio.file.Files
+import java.nio.file.Path
+import java.time.Duration
+import java.time.Instant
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,12 +31,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3PlaybackFactory
 import net.bjoernpetersen.musicbot.spi.util.FileStorage
-import java.nio.file.Files
-import java.nio.file.Path
-import java.time.Duration
-import java.time.Instant
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 @Suppress("TooManyFunctions")
 class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {

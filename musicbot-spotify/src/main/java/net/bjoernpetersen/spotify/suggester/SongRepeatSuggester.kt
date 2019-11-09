@@ -1,5 +1,7 @@
 package net.bjoernpetersen.spotify.suggester
 
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,8 +15,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 @IdBase("Spotify song repeater")
 class SongRepeatSuggester : Suggester, CoroutineScope {

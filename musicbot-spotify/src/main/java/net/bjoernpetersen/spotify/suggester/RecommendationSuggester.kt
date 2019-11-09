@@ -1,6 +1,9 @@
 package net.bjoernpetersen.spotify.suggester
 
 import com.wrapper.spotify.SpotifyApi
+import java.util.LinkedList
+import javax.inject.Inject
+import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
@@ -26,9 +29,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
 import net.bjoernpetersen.spotify.marketFromToken
-import java.util.LinkedList
-import javax.inject.Inject
-import kotlin.math.min
 
 @Suppress("TooManyFunctions")
 @IdBase("Spotify recommendation suggester")

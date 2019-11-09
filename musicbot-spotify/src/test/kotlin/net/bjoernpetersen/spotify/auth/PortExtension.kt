@@ -2,16 +2,16 @@ package net.bjoernpetersen.spotify.auth
 
 import com.google.common.collect.Multimap
 import com.google.common.collect.MultimapBuilder
-import org.junit.jupiter.api.extension.AfterEachCallback
-import org.junit.jupiter.api.extension.Extension
-import org.junit.jupiter.api.extension.ExtensionContext
-import org.junit.jupiter.api.extension.ParameterContext
-import org.junit.jupiter.api.extension.ParameterResolver
 import java.net.ServerSocket
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import java.util.function.Supplier
 import kotlin.concurrent.withLock
+import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.Extension
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.extension.ParameterContext
+import org.junit.jupiter.api.extension.ParameterResolver
 
 class PortExtension : Extension, ParameterResolver, AfterEachCallback {
     private val lock: Lock = ReentrantLock()

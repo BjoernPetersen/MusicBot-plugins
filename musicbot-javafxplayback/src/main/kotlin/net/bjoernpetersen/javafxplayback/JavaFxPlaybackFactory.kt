@@ -1,5 +1,7 @@
 package net.bjoernpetersen.javafxplayback
 
+import java.io.File
+import java.io.IOException
 import javafx.scene.media.MediaException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,8 +11,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3PlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.UnsupportedAudioFileException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WavePlaybackFactory
-import java.io.File
-import java.io.IOException
 
 class JavaFxPlaybackFactory : Mp3PlaybackFactory, WavePlaybackFactory {
 

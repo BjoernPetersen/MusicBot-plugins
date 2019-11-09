@@ -8,6 +8,13 @@ import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.SearchResult
 import com.google.api.services.youtube.model.Video
 import com.google.common.collect.Lists
+import java.io.IOException
+import java.time.Duration
+import java.util.ArrayList
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -27,13 +34,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeAuthenti
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeProvider
 import net.bjoernpetersen.musicbot.youtube.cache.AsyncLoader
-import java.io.IOException
-import java.time.Duration
-import java.util.ArrayList
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import kotlin.math.max
-import kotlin.math.min
 
 @Suppress("TooManyFunctions")
 class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispatchers.IO) {

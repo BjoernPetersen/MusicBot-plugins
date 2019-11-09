@@ -2,6 +2,16 @@ package net.bjoernpetersen.spotify.auth
 
 import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import io.ktor.http.encodeURLParameter
+import java.io.IOException
+import java.net.MalformedURLException
+import java.net.URL
+import java.security.SecureRandom
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -26,16 +36,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.musicbot.spi.util.BrowserOpener
-import java.io.IOException
-import java.net.MalformedURLException
-import java.net.URL
-import java.security.SecureRandom
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
 @UseExperimental(ObsoleteCoroutinesApi::class)
