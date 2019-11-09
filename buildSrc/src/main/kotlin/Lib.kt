@@ -6,7 +6,7 @@ object Lib {
     const val SLF4J = "1.8.0-beta4"
     const val JUNIT = "5.5.2"
 
-    const val KTOR = "1.2.4"
+    const val KTOR = "1.2.5"
 
     // Mp3Provider
     const val ID3_TAG = "0.9.1"
