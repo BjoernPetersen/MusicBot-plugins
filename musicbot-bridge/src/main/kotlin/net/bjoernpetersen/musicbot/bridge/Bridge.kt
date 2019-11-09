@@ -22,11 +22,11 @@ import net.bjoernpetersen.musicbot.spi.player.Player
 import net.bjoernpetersen.musicbot.spi.player.PlayerStateListener
 import net.bjoernpetersen.musicbot.spi.player.SongQueue
 import net.bjoernpetersen.musicbot.spi.plugin.GenericPlugin
-import net.bjoernpetersen.musicbot.spi.plugin.InitializationException
+import net.bjoernpetersen.musicbot.api.plugin.InitializationException
+import net.bjoernpetersen.musicbot.api.plugin.id
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.PluginLookup
 import net.bjoernpetersen.musicbot.spi.plugin.Provider
-import net.bjoernpetersen.musicbot.spi.plugin.id
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import javax.inject.Inject
 import kotlin.reflect.KClass
@@ -97,7 +97,7 @@ class Bridge : GenericPlugin {
                 refresh {
                     pluginFinder.providers.map {
                         @Suppress("UNCHECKED_CAST")
-                        NamedPlugin(it.id as KClass<out Provider>, it.name)
+                        NamedPlugin(it.id.type as KClass<out Provider>, it.name)
                     }
                 }
             }
