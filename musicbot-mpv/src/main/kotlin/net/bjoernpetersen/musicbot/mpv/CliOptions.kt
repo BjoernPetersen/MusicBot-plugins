@@ -1,7 +1,6 @@
 package net.bjoernpetersen.musicbot.mpv
 
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.FileChooser
 import net.bjoernpetersen.musicbot.api.config.FileSerializer
 import net.bjoernpetersen.musicbot.api.config.IntSerializer
@@ -11,7 +10,6 @@ import net.bjoernpetersen.musicbot.api.config.boolean
 import net.bjoernpetersen.musicbot.api.config.serialized
 import java.io.File
 
-@UseExperimental(ExperimentalConfigDsl::class)
 internal class CliOptions(config: Config) {
     val allOptions: List<CliOption<*, *>>
 

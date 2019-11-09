@@ -7,7 +7,6 @@ import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.IntSerializer
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.NumberBox
@@ -196,7 +195,6 @@ private fun Config.SerializedEntry<Int>.setIfPresent(set: (Float) -> Unit) {
 }
 
 @Suppress("MagicNumber")
-@UseExperimental(ExperimentalConfigDsl::class)
 private class RecommendationConfig(config: Config) {
     val fallbackEntry by config.string {
         description = "Spotify song URL of a song to base stations on if there is no alternative"

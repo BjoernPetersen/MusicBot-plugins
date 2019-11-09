@@ -3,7 +3,6 @@ package net.bjoernpetersen.video.suggester
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.PathSerializer
 import net.bjoernpetersen.musicbot.api.config.actionButton
 import net.bjoernpetersen.musicbot.api.config.choiceBox
@@ -26,7 +25,6 @@ import javax.inject.Inject
 import kotlin.math.min
 import kotlin.streams.asSequence
 
-@ExperimentalConfigDsl
 private class FolderSuggesterConfig(config: Config, provider: VideoProvider) {
     val directory by config.serialized<Path> {
         description = "Directory to suggest videos from"
@@ -71,7 +69,6 @@ private class FolderSuggesterConfig(config: Config, provider: VideoProvider) {
     )
 }
 
-@UseExperimental(ExperimentalConfigDsl::class)
 @IdBase("Video folder")
 class FolderSuggester : Suggester {
     private val logger = KotlinLogging.logger { }

@@ -9,7 +9,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.io.errors.IOException
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.boolean
 import net.bjoernpetersen.musicbot.api.config.choiceBox
@@ -115,7 +114,6 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
         nextSongs.remove(song)
     }
 
-    @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
         shuffle = config.boolean("shuffle") {
             description = "Whether the playlist should be shuffled"

@@ -2,7 +2,6 @@ package net.bjoernpetersen.localmp3.suggester
 
 import net.bjoernpetersen.localmp3.provider.Mp3Provider
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.TextBox
 import net.bjoernpetersen.musicbot.api.config.string
 import net.bjoernpetersen.musicbot.api.player.Song
@@ -30,7 +29,6 @@ class RandomMp3Suggester : Suggester {
             return subject ?: "Random ${provider.subject}"
         }
 
-    @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
         customSubject = config.string("DisplayName") {
             description = "Name to display in clients"

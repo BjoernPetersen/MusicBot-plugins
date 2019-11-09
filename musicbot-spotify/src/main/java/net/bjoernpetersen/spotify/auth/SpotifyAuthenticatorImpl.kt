@@ -11,7 +11,6 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.IntSerializer
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.NumberBox
@@ -39,7 +38,7 @@ import java.time.format.FormatStyle
 import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
-@UseExperimental(ObsoleteCoroutinesApi::class, ExperimentalConfigDsl::class)
+@UseExperimental(ObsoleteCoroutinesApi::class)
 class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
     CoroutineScope by PluginScope(newSingleThreadContext("SpotifyAuth")) {
 

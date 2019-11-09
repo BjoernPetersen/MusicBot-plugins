@@ -8,7 +8,6 @@ import me.xdrop.fuzzywuzzy.FuzzySearch
 import net.bjoernpetersen.m3u.M3uParser
 import net.bjoernpetersen.m3u.model.M3uEntry
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.PathSerializer
 import net.bjoernpetersen.musicbot.api.config.openFile
 import net.bjoernpetersen.musicbot.api.config.serialized
@@ -44,7 +43,6 @@ class RadioProvider : Provider, CoroutineScope by PluginScope(Dispatchers.IO) {
     @Inject
     private lateinit var playbackFactory: Mp3StreamPlaybackFactory
 
-    @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
         playlistFile = config.serialized("playlistFile") {
             description = "An m3u playlist file containing radio station URLs"

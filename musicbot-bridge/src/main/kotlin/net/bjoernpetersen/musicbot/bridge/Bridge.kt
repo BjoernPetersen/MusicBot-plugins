@@ -3,7 +3,6 @@ package net.bjoernpetersen.musicbot.bridge
 import kotlinx.coroutines.runBlocking
 import net.bjoernpetersen.musicbot.api.auth.BotUser
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.SerializationException
 import net.bjoernpetersen.musicbot.api.config.TextBox
@@ -70,7 +69,6 @@ class Bridge : GenericPlugin {
         }
     }
 
-    @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
         songId = config.string("songId") {
             description = "The song ID to play"

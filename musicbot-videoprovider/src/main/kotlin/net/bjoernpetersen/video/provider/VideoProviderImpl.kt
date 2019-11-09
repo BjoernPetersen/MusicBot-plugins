@@ -11,7 +11,6 @@ import kotlinx.coroutines.withContext
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.PathSerializer
 import net.bjoernpetersen.musicbot.api.config.TextBox
 import net.bjoernpetersen.musicbot.api.config.boolean
@@ -41,7 +40,7 @@ import java.util.Locale
 import kotlin.streams.asSequence
 
 @Suppress("TooManyFunctions")
-@UseExperimental(ExperimentalConfigDsl::class, ExperimentalVideoFilePlayback::class)
+@UseExperimental(ExperimentalVideoFilePlayback::class)
 class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatchers.IO) {
     private val logger = KotlinLogging.logger { }
 

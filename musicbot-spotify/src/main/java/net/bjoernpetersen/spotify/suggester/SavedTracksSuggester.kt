@@ -9,7 +9,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.io.errors.IOException
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.boolean
 import net.bjoernpetersen.musicbot.api.config.string
@@ -30,7 +29,6 @@ import kotlin.math.max
 import kotlin.math.min
 
 @Suppress("TooManyFunctions")
-@UseExperimental(ExperimentalConfigDsl::class)
 @IdBase("Spotify saved tracks")
 class SavedTracksSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.IO) {
     private val logger = KotlinLogging.logger {}

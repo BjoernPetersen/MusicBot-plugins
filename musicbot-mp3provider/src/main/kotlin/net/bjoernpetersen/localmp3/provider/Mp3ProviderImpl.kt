@@ -7,7 +7,6 @@ import kotlinx.coroutines.withContext
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.PathSerializer
 import net.bjoernpetersen.musicbot.api.config.TextBox
 import net.bjoernpetersen.musicbot.api.config.boolean
@@ -142,7 +141,6 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
     }
 }
 
-@UseExperimental(ExperimentalConfigDsl::class)
 private class Mp3ProviderConfig(config: Config) {
     val folder by config.serialized<Path> {
         description = "The folder the MP3s should be taken from"

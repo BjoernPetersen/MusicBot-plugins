@@ -3,7 +3,6 @@ package net.bjoernpetersen.musicbot.radio
 import net.bjoernpetersen.m3u.M3uParser
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
-import net.bjoernpetersen.musicbot.api.config.ExperimentalConfigDsl
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.SerializationException
 import net.bjoernpetersen.musicbot.api.config.choiceBox
@@ -39,7 +38,6 @@ class RadioSuggester : Suggester {
 
     private lateinit var song: Song
 
-    @UseExperimental(ExperimentalConfigDsl::class)
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
         radioStation = config.serialized("radioStation") {
             description = "The entry from the playlist file to play"
