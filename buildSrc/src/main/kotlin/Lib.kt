@@ -20,7 +20,7 @@ object Lib {
     const val M3U_PARSER = "1.0.0"
 
     // Spotify
-    const val SPOTIFY = "3.0.0"
+    const val SPOTIFY = "4.2.0"
 
     // sysvolume
     const val VOLCTL = "3.0.0"
