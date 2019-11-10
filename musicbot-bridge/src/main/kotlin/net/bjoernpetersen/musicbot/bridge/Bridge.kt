@@ -5,8 +5,8 @@ import kotlin.reflect.KClass
 import kotlinx.coroutines.runBlocking
 import net.bjoernpetersen.musicbot.api.auth.BotUser
 import net.bjoernpetersen.musicbot.api.config.Config
+import net.bjoernpetersen.musicbot.api.config.DeserializationException
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
-import net.bjoernpetersen.musicbot.api.config.SerializationException
 import net.bjoernpetersen.musicbot.api.config.TextBox
 import net.bjoernpetersen.musicbot.api.config.choiceBox
 import net.bjoernpetersen.musicbot.api.config.serialization
@@ -83,7 +83,7 @@ class Bridge : GenericPlugin {
                 serialize { "${it.id};${it.name}" }
                 deserialize {
                     val splits = it.split(';')
-                    if (splits.size < 2) throw SerializationException()
+                    if (splits.size < 2) throw DeserializationException()
                     val id = splits[0]
                     val name = splits.subList(1, splits.size).joinToString(";")
                     NamedPlugin(id, name)

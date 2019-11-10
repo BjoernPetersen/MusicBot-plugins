@@ -21,11 +21,11 @@ import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
+import net.bjoernpetersen.musicbot.api.config.DeserializationException
 import net.bjoernpetersen.musicbot.api.config.IntSerializer
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.NumberBox
 import net.bjoernpetersen.musicbot.api.config.PasswordBox
-import net.bjoernpetersen.musicbot.api.config.SerializationException
 import net.bjoernpetersen.musicbot.api.config.actionButton
 import net.bjoernpetersen.musicbot.api.config.serialization
 import net.bjoernpetersen.musicbot.api.config.serialized
@@ -159,7 +159,8 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
             serialization {
                 serialize { it.epochSecond.toString() }
                 deserialize {
-                    it.toLongOrNull()?.let(Instant::ofEpochSecond) ?: throw SerializationException()
+                    it.toLongOrNull()?.let(Instant::ofEpochSecond)
+                        ?: throw DeserializationException()
                 }
             }
             actionButton {

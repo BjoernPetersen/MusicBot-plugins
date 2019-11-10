@@ -2,7 +2,7 @@ package net.bjoernpetersen.video.suggester
 
 import java.util.Comparator
 import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
-import net.bjoernpetersen.musicbot.api.config.SerializationException
+import net.bjoernpetersen.musicbot.api.config.DeserializationException
 
 enum class SortMode(
     val friendlyName: String,
@@ -25,7 +25,7 @@ enum class SortMode(
             return try {
                 valueOf(string)
             } catch (e: IllegalArgumentException) {
-                throw SerializationException()
+                throw DeserializationException()
             }
         }
     }

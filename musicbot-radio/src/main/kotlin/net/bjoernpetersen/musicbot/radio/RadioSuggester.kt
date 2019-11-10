@@ -6,8 +6,8 @@ import javax.inject.Inject
 import net.bjoernpetersen.m3u.M3uParser
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
+import net.bjoernpetersen.musicbot.api.config.DeserializationException
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
-import net.bjoernpetersen.musicbot.api.config.SerializationException
 import net.bjoernpetersen.musicbot.api.config.choiceBox
 import net.bjoernpetersen.musicbot.api.config.serialized
 import net.bjoernpetersen.musicbot.api.player.Song
@@ -94,7 +94,7 @@ private class SongSerializer(private val provider: RadioProvider) : ConfigSerial
         return try {
             String(decoder.decode(this), Charsets.UTF_8)
         } catch (e: IllegalArgumentException) {
-            throw SerializationException()
+            throw DeserializationException()
         }
     }
 
@@ -107,7 +107,7 @@ private class SongSerializer(private val provider: RadioProvider) : ConfigSerial
     @Suppress("MagicNumber")
     override fun deserialize(string: String): Song {
         val parts = string.split(';')
-        if (parts.size != 2) throw SerializationException()
+        if (parts.size != 2) throw DeserializationException()
         val id = parts[0].decode()
         val title = parts[1].decode()
         return provider.createSong(id, title)

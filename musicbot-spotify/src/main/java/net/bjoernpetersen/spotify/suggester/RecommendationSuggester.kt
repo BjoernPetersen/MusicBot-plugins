@@ -10,10 +10,10 @@ import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
+import net.bjoernpetersen.musicbot.api.config.DeserializationException
 import net.bjoernpetersen.musicbot.api.config.IntSerializer
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.NumberBox
-import net.bjoernpetersen.musicbot.api.config.SerializationException
 import net.bjoernpetersen.musicbot.api.config.TextBox
 import net.bjoernpetersen.musicbot.api.config.serialized
 import net.bjoernpetersen.musicbot.api.config.string
@@ -177,7 +177,7 @@ private data class SimpleSong(val id: String, val name: String) {
 
         override fun deserialize(string: String): SimpleSong {
             val splits = string.split(";")
-            if (splits.size < 2) throw SerializationException()
+            if (splits.size < 2) throw DeserializationException()
             val id = splits[0]
             val name = splits.subList(1, splits.size).joinToString(";")
             return SimpleSong(id, name)
