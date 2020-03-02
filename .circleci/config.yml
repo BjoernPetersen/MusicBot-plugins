@@ -27,7 +27,7 @@ commands:
       - steps: << parameters.steps >>
 
 jobs:
-  build_cache:
+  fill_cache:
     executor: jdk
     steps:
       - checkout
@@ -102,56 +102,56 @@ jobs:
 workflows:
   full_workflow:
     jobs:
-      - build_cache
+      - fill_cache
       - check:
           name: check_bridge
           project: bridge
           requires:
-            - build_cache
+            - fill_cache
       - check:
           name: check_javafxplayback
           project: javafxplayback
           executor: jfx
           requires:
-            - build_cache
+            - fill_cache
       - check:
           name: check_mp3provider
           project: mp3provider
           requires:
-            - build_cache
+            - fill_cache
       - check:
           name: check_mpv
           project: mpv
           requires:
-            - build_cache
+            - fill_cache
       - check:
           name: check_radio
           project: radio
           requires:
-            - build_cache
+            - fill_cache
       - check:
           name: check_spotify
           project: spotify
           requires:
-            - build_cache
+            - fill_cache
       - check:
           name: check_sysvolume
           project: sysvolume
           requires:
-            - build_cache
+            - fill_cache
       - check:
           name: check_videoprovider
           project: videoprovider
           requires:
-            - build_cache
+            - fill_cache
       - check:
           name: check_youtube
           project: youtube
           requires:
-            - build_cache
+            - fill_cache
       - check_root:
           requires:
-            - build_cache
+            - fill_cache
       - build:
           project: bridge
           name: build_bridge
