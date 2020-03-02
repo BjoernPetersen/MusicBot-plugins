@@ -8,6 +8,8 @@ import net.bjoernpetersen.musicbot.api.config.TextBox
 import net.bjoernpetersen.musicbot.api.config.string
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.plugin.IdBase
+import net.bjoernpetersen.musicbot.api.plugin.InitializationException
+import net.bjoernpetersen.musicbot.spi.plugin.BrokenSuggesterException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 
@@ -44,7 +46,11 @@ class RandomMp3Suggester : Suggester {
 
     override suspend fun initialize(initStateWriter: InitStateWriter) {
         initStateWriter.state("Loading next songs...")
-        refreshNextSongs()
+        try {
+            refreshNextSongs()
+        } catch (e: BrokenSuggesterException) {
+            throw InitializationException(e)
+        }
     }
 
     override suspend fun close() {
@@ -54,6 +60,9 @@ class RandomMp3Suggester : Suggester {
     private fun refreshNextSongs() {
         provider.getSongs().forEach { nextSongs.add(it) }
         nextSongs.shuffle()
+        if (nextSongs.isEmpty()) {
+            throw BrokenSuggesterException()
+        }
     }
 
     override suspend fun getNextSuggestions(maxLength: Int): List<Song> {
