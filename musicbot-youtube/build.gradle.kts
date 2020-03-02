@@ -11,6 +11,11 @@ tasks {
     }
 }
 
+repositories {
+    jcenter()
+    google()
+}
+
 dependencies {
     compileOnly(
         group = "com.github.bjoernpetersen",
