@@ -26,6 +26,6 @@ object Lib {
     const val VOLCTL = "3.0.0"
 
     // YouTube
-    const val YOUTUBE_API = "v3-rev20190827-1.30.1"
+    const val YOUTUBE_API = "v3-rev20200109-1.30.8"
     const val CAFFEINE = "2.8.1"
 }
