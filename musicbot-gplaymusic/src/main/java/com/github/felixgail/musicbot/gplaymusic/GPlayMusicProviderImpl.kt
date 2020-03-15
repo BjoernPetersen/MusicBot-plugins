@@ -50,11 +50,14 @@ class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope
 
     private lateinit var streamQuality: Config.SerializedEntry<StreamQuality>
     private lateinit var cacheTime: Config.SerializedEntry<Int>
+
     @Inject
     private lateinit var fileStorage: FileStorage
     private lateinit var fileDir: File
+
     @Inject
     private lateinit var playbackFactory: Mp3PlaybackFactory
+
     @Inject
     private lateinit var api: GPlayMusicApi
 
@@ -69,7 +72,7 @@ class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope
     override val subject: String
         get() = "Google Play Music"
 
-    override fun createStateEntries(state: Config) {}
+    override fun createStateEntries(state: Config) = Unit
 
     override fun createConfigEntries(config: Config): List<Config.Entry<*>> {
         streamQuality = config.serialized("Quality") {
@@ -92,6 +95,7 @@ class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope
             default(StreamQuality.HIGH)
         }
 
+        @Suppress("MagicNumber")
         cacheTime = config.serialized("Cache Time") {
             description = "Duration in Minutes until cached songs will be deleted."
             serializer = IntSerializer
@@ -113,8 +117,8 @@ class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope
         initStateWriter.state("Creating cache")
         cachedSongs = CacheBuilder.newBuilder()
             .expireAfterAccess(cacheTime.get()!!.toLong(), TimeUnit.MINUTES)
-            .initialCapacity(256)
-            .maximumSize(1024)
+            .initialCapacity(CACHE_INITIAL_CAPACITY)
+            .maximumSize(CACHE_MAX_SIZE)
             .build(AsyncLoader(this) {
                 getSongFromTrack(api.trackApi.getTrack(it))
             })
@@ -131,9 +135,10 @@ class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope
         run { cancel() }
     }
 
+    @Suppress("MagicNumber")
     override suspend fun search(query: String, offset: Int): List<Song> {
         return withContext(coroutineContext) {
-            try {
+            val list = try {
                 // We retrieve up to two pages for now and limit them to a size of 30 each
                 val max = if (offset < 20) 30 else 60
                 val result = api.trackApi.search(query, max).asSequence()
@@ -154,11 +159,13 @@ class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope
                     emptyList()
                 }
             }
+            list
         }
     }
 
     @Throws(NoSuchSongException::class)
     override suspend fun lookup(id: String): Song {
+        @Suppress("TooGenericExceptionCaught")
         try {
             return cachedSongs.get(id).await()
         } catch (e: Exception) {
@@ -196,5 +203,10 @@ class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope
         } catch (e: UnsupportedAudioFileException) {
             throw IOException(e)
         }
+    }
+
+    private companion object {
+        private const val CACHE_INITIAL_CAPACITY = 256
+        private const val CACHE_MAX_SIZE = 1024L
     }
 }

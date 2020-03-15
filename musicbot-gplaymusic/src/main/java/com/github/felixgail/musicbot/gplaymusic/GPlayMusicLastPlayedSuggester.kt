@@ -25,6 +25,7 @@ import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.gplaymusic.GPlayMusicProvider
 
+@Suppress("TooManyFunctions")
 @IdBase("Station based on last played song")
 class GPlayMusicLastPlayedSuggester : Suggester,
     CoroutineScope by PluginScope(Dispatchers.IO) {
@@ -32,6 +33,7 @@ class GPlayMusicLastPlayedSuggester : Suggester,
 
     @Inject
     private lateinit var provider: GPlayMusicProvider
+
     @Inject
     private lateinit var api: GPlayMusicApi
 
