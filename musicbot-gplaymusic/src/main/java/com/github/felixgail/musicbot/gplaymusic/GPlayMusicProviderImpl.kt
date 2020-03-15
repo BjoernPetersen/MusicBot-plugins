@@ -6,6 +6,14 @@ import com.github.felixgail.gplaymusic.model.enums.StreamQuality
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.LoadingCache
 import com.google.inject.Inject
+import java.io.File
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.concurrent.TimeUnit
+import kotlin.math.max
+import kotlin.math.min
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -24,9 +32,9 @@ import net.bjoernpetersen.musicbot.api.config.serialized
 import net.bjoernpetersen.musicbot.api.loader.FileResource
 import net.bjoernpetersen.musicbot.api.loader.SongLoadingException
 import net.bjoernpetersen.musicbot.api.player.Song
+import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.loader.Resource
-import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
@@ -35,14 +43,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.UnsupportedAudioFileException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.gplaymusic.GPlayMusicProvider
 import net.bjoernpetersen.musicbot.spi.util.FileStorage
-import java.io.File
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.concurrent.TimeUnit
-import kotlin.math.max
-import kotlin.math.min
 
 class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope(Dispatchers.IO) {
 
