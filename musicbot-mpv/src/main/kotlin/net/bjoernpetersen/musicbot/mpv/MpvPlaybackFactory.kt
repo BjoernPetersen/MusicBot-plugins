@@ -41,7 +41,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AacPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AacStreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AviPlaybackFactory
-import net.bjoernpetersen.musicbot.spi.plugin.predefined.ExperimentalVideoFilePlayback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.FlacPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.FlacStreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.MkvPlaybackFactory
@@ -58,7 +57,6 @@ import net.bjoernpetersen.musicbot.spi.util.FileStorage
 
 private const val EXECUTABLE = "mpv"
 
-@UseExperimental(ExperimentalVideoFilePlayback::class)
 @IdBase("mpv")
 class MpvPlaybackFactory :
     AacPlaybackFactory,

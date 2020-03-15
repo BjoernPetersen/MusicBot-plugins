@@ -38,7 +38,7 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.musicbot.spi.util.BrowserOpener
 
 @Suppress("TooManyFunctions")
-@UseExperimental(ObsoleteCoroutinesApi::class)
+@OptIn(ObsoleteCoroutinesApi::class)
 class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
     CoroutineScope by PluginScope(newSingleThreadContext("SpotifyAuth")) {
 

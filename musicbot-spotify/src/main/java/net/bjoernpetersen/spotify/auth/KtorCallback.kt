@@ -24,7 +24,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@UseExperimental(KtorExperimentalAPI::class)
+@OptIn(KtorExperimentalAPI::class)
 internal class KtorCallback(private val port: Int) {
 
     val callbackUrl = URL("http", LOCALHOST, port, CALLBACK_PATH)

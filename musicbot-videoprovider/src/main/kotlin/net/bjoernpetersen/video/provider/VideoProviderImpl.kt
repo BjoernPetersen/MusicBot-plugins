@@ -34,13 +34,11 @@ import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AviPlaybackFactory
-import net.bjoernpetersen.musicbot.spi.plugin.predefined.ExperimentalVideoFilePlayback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.FilePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.MkvPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp4PlaybackFactory
 
 @Suppress("TooManyFunctions")
-@UseExperimental(ExperimentalVideoFilePlayback::class)
 class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatchers.IO) {
     private val logger = KotlinLogging.logger { }
 
@@ -50,10 +48,13 @@ class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatche
 
     @Inject(optional = true)
     private lateinit var aviPlayback: AviPlaybackFactory
+
     @Inject(optional = true)
     private lateinit var mkvPlayback: MkvPlaybackFactory
+
     @Inject(optional = true)
     private lateinit var mp4Playback: Mp4PlaybackFactory
+
     @Inject
     private lateinit var playback: Playbacks
 
@@ -188,12 +189,13 @@ class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatche
     }
 }
 
-@UseExperimental(ExperimentalVideoFilePlayback::class)
 private class Playbacks @Inject private constructor() {
     @Inject(optional = true)
     private lateinit var aviPlayback: AviPlaybackFactory
+
     @Inject(optional = true)
     private lateinit var mkvPlayback: MkvPlaybackFactory
+
     @Inject(optional = true)
     private lateinit var mp4Playback: Mp4PlaybackFactory
 
