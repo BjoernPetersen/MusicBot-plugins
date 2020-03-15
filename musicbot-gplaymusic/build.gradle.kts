@@ -6,7 +6,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version Plugin.SHADOW_JAR
 }
 
-version = "0.4.0"
+version = "0.5.0"
 
 tasks {
     val shadowJar by getting(ShadowJar::class) {
