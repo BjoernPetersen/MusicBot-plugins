@@ -48,6 +48,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
 
     @Inject
     private lateinit var playback: YouTubePlaybackFactory
+
     @Inject
     private lateinit var auth: YouTubeAuthenticator
     private lateinit var api: YouTube
@@ -178,6 +179,9 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
             }
         } catch (e: IOException) {
             logger.error(e) { "IOException during search" }
+            if (e.message?.contains("quota", ignoreCase = true) == true) {
+                auth.invalidateToken()
+            }
             return emptyList()
         }
 
@@ -208,6 +212,9 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
             }
         } catch (e: IOException) {
             logger.error(e) { "Error looking up song" }
+            if (e.message?.contains("quota", ignoreCase = true) == true) {
+                auth.invalidateToken()
+            }
             emptyList()
         }
 
