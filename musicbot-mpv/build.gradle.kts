@@ -3,7 +3,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version Plugin.SHADOW_JAR
 }
 
-version = "0.9.0"
+version = "0.10.0"
 
 dependencies {
     compileOnly(
