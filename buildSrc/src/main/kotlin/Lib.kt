@@ -8,6 +8,9 @@ object Lib {
 
     const val KTOR = "1.2.5"
 
+    // GPlayMusic
+    const val GPLAYMUSIC = "0.3.8"
+
     // Mp3Provider
     const val ID3_TAG = "0.9.1"
     const val FUZZYWUZZY = "1.2.0"

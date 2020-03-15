@@ -109,6 +109,11 @@ workflows:
           requires:
             - fill_cache
       - check:
+          name: check_gplaymusic
+          project: gplaymusic
+          requires:
+            - fill_cache
+      - check:
           name: check_javafxplayback
           project: javafxplayback
           executor: jfx
@@ -157,6 +162,11 @@ workflows:
           name: build_bridge
           requires:
             - check_bridge
+      - build:
+          project: gplaymusic
+          name: build_gplaymusic
+          requires:
+            - check_gplaymusic
       - build:
           project: javafxplayback
           name: build_javafxplayback

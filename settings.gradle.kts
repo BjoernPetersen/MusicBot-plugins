@@ -1,6 +1,7 @@
 rootProject.name = "musicbot-plugins"
 include(
     "musicbot-bridge",
+    "musicbot-gplaymusic",
     "musicbot-javafxplayback",
     "musicbot-mp3provider",
     "musicbot-mpv",
