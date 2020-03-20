@@ -9,7 +9,7 @@ object Lib {
     const val KTOR = "1.2.5"
 
     // GPlayMusic
-    const val GPLAYMUSIC = "0.4.0R1-SNAPSHOT"
+    const val GPLAYMUSIC = "0.4.0"
 
     // Mp3Provider
     const val ID3_TAG = "0.9.1"
