@@ -18,6 +18,8 @@ object Lib {
 
     // mpv
     const val NU_PROCESS = "1.2.6"
+    const val MOSHI = "1.9.2"
+    const val JUNIXSOCKET = "2.3.2"
 
     // Radio
     const val M3U_PARSER = "1.1.0"

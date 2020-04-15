@@ -1,24 +1,9 @@
 package net.bjoernpetersen.musicbot.mpv
 
-import com.zaxxer.nuprocess.NuAbstractProcessHandler
-import com.zaxxer.nuprocess.NuProcess
-import com.zaxxer.nuprocess.NuProcessBuilder
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
-import kotlinx.coroutines.withTimeoutOrNull
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.loader.NoResource
@@ -26,7 +11,6 @@ import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.loader.Resource
-import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AacPlaybackFactory
@@ -45,18 +29,14 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.WaveStreamPlaybackFacto
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WmvPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.util.FileStorage
-import java.io.BufferedWriter
 import java.io.File
 import java.io.IOException
 import java.net.URL
-import java.nio.ByteBuffer
-import java.nio.CharBuffer
-import java.time.Duration
-import java.util.LinkedList
 import javax.inject.Inject
 
 private const val EXECUTABLE = "mpv"
 
+@Suppress("BlockingMethodInNonBlockingContext")
 @IdBase("mpv")
 class MpvPlaybackFactory :
     AacPlaybackFactory,
@@ -99,7 +79,6 @@ class MpvPlaybackFactory :
         progressFeedback.state("Testing executable...")
         withContext(coroutineContext) {
             try {
-                @Suppress("BlockingMethodInNonBlockingContext")
                 ProcessBuilder(EXECUTABLE, "-h", "--no-config").start()
             } catch (e: IOException) {
                 progressFeedback.warning("Failed to start mpv.")
@@ -147,235 +126,5 @@ class MpvPlaybackFactory :
 
     override suspend fun close() {
         run { cancel() }
-    }
-}
-
-private class MpvHandler : NuAbstractProcessHandler() {
-    private val logger = KotlinLogging.logger { }
-
-    private lateinit var mpv: NuProcess
-
-    private val patternMutex = Mutex()
-    private val patterns: MutableMap<Regex, CompletableDeferred<MatchResult>> =
-        HashMap(PATTERN_CAPACITY)
-
-    private val exitValue = CompletableDeferred<Int>()
-
-    override fun onPreStart(nuProcess: NuProcess) {
-        this.mpv = nuProcess
-    }
-
-    private fun matchLine(line: String) {
-        runBlocking {
-            patternMutex.withLock {
-                val remove = LinkedList<Regex>()
-                for ((regex, deferred) in patterns.entries) {
-                    val matcher = regex.matchEntire(line)
-                    if (matcher != null) {
-                        deferred.complete(matcher)
-                        remove.add(regex)
-                    }
-                }
-                remove.forEach { patterns.remove(it) }
-            }
-        }
-    }
-
-    override fun onStdout(buffer: ByteBuffer, closed: Boolean) {
-        if (closed) return
-
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
-        val line = String(bytes)
-        logger.trace { "MPV says: $line" }
-        matchLine(line.trim())
-    }
-
-    override fun onStderr(buffer: ByteBuffer, closed: Boolean) {
-        if (closed) return
-
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
-        val line = String(bytes)
-        logger.warn { "MPV complains: $line" }
-    }
-
-    /**
-     * Expects a message on StdOut matching the given [regex] within the given [timeout].
-     */
-    suspend fun expectMessageAsync(
-        regex: Regex,
-        timeout: Duration,
-        scope: CoroutineScope = GlobalScope
-    ): Deferred<MatchResult> {
-        val matcher = CompletableDeferred<MatchResult>()
-        patternMutex.withLock {
-            patterns[regex] = matcher
-        }
-
-        return scope.async(Dispatchers.Default) {
-            try {
-                withTimeout(timeout.toMillis()) {
-                    matcher.await()
-                }
-            } finally {
-                patternMutex.withLock {
-                    patterns.remove(regex)
-                }
-            }
-        }
-    }
-
-    fun getExitValueAsync(): Deferred<Int> = exitValue
-
-    override fun onExit(statusCode: Int) {
-        exitValue.complete(statusCode)
-    }
-
-    private companion object {
-        const val PATTERN_CAPACITY = 32
-    }
-}
-
-private class MpvPlayback(
-    dir: File,
-    private val path: String,
-    private val options: CliOptions
-) : AbstractPlayback() {
-
-    private val logger = KotlinLogging.logger { }
-
-    // TODO for some reason, the file method doesn't work for linux
-    private val isWin = System.getProperty("os.name").toLowerCase().startsWith("win")
-    private val filePath =
-        if (isWin) File.createTempFile("mpvCmd", null, dir).canonicalPath
-        else "/dev/stdin"
-
-    private val handler = MpvHandler()
-    private val mpv: NuProcess = NuProcessBuilder(createCommand()).run {
-        setProcessListener(handler)
-        start()
-    }
-
-    private val cmdWriter: BufferedWriter? = if (isWin) File(filePath).bufferedWriter()
-    else null
-
-    init {
-        launch {
-            val exitValue = handler.getExitValueAsync().await()
-            if (exitValue > 0) logger.warn { "mpv exited with non-zero exit value: $exitValue" }
-            else logger.debug { "mpv process ended" }
-            markDone()
-        }
-
-        launch {
-            delay(LOAD_TIME_MILLIS)
-            while (mpv.isRunning) {
-                updateProgress()
-                delay(STATE_CHECK_MILLIS)
-            }
-        }
-    }
-
-    private suspend fun updateProgress() {
-        // Tell process handler to look for our answer
-        val matcher = handler.expectMessageAsync(PROGRESS_MATCH, Duration.ofSeconds(1), this)
-
-        // Tell mpv to send progress message
-        writeCommand("print-text \${=time-pos}")
-
-        try {
-            val matches = matcher.await()
-            val progressString = matches.groupValues[1]
-            val progress = progressString.split('.')
-                .let { Duration.ofSeconds(it[0].toLong(), it[1].toLong()) }
-            logger.debug { "Progress update: ${progress.seconds} ${progress.nano}" }
-            feedbackChannel.updateProgress(progress)
-        } catch (e: TimeoutCancellationException) {
-            logger.warn { "Timeout while waiting for progress message" }
-        }
-    }
-
-    private fun createCommand(): List<String> {
-        val command = mutableListOf(
-            EXECUTABLE,
-            "--input-file=$filePath",
-            "--no-input-terminal",
-            "--quiet",
-            "--pause"
-        )
-
-        options.allOptions.forEach {
-            it.getCliArgs().filterNotNull().forEach { command.add(it) }
-        }
-
-        command.add(path)
-        return command
-    }
-
-    private fun writeCommand(command: String) {
-        if (isWin) {
-            val cmdWriter = cmdWriter!!
-            try {
-                cmdWriter.write(command)
-                cmdWriter.newLine()
-                cmdWriter.flush()
-            } catch (e: IOException) {
-                logger.info(e) { "Error during command write: $command" }
-            }
-        } else {
-            val encoder = Charsets.UTF_8.newEncoder()
-            val commandBuffer = encoder.encode(CharBuffer.wrap(command + System.lineSeparator()))
-            mpv.writeStdin(commandBuffer)
-        }
-    }
-
-    override suspend fun play() {
-        withContext(coroutineContext) {
-            writeCommand("set pause no")
-        }
-    }
-
-    override suspend fun pause() {
-        withContext(coroutineContext) {
-            writeCommand("set pause yes")
-        }
-    }
-
-    override suspend fun close() {
-        withContext(coroutineContext) {
-            if (mpv.isRunning) {
-                try {
-                    writeCommand("quit")
-                } catch (e: IOException) {
-                    logger.warn(e) { "Could not send quit command to mpv" }
-                }
-            }
-
-            if (isWin) {
-                cmdWriter!!.close()
-            }
-
-            val exitValue = withTimeoutOrNull(EXIT_TIMEOUT_MILLIS) {
-                handler.getExitValueAsync().await()
-            }
-            if (exitValue == null) {
-                logger.warn { "There is probably an unclosed mpv process." }
-                mpv.destroy(true)
-            }
-
-            if (isWin && !File(filePath).delete()) {
-                logger.warn { "Could not delete temporary file: $filePath" }
-            }
-        }
-        super.close()
-    }
-
-    private companion object {
-        val PROGRESS_MATCH = Regex("""(\d+\.\d+)""")
-
-        const val LOAD_TIME_MILLIS: Long = 2000
-        const val STATE_CHECK_MILLIS: Long = 4000
-        const val EXIT_TIMEOUT_MILLIS: Long = 5000
     }
 }

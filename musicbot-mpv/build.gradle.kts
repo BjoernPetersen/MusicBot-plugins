@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    kotlin("kapt")
     id("com.github.johnrengelman.shadow") version Plugin.SHADOW_JAR
 }
 
@@ -18,6 +19,23 @@ dependencies {
         group = "com.zaxxer",
         name = "nuprocess",
         version = Lib.NU_PROCESS
+    )
+
+    implementation(
+        group = "com.squareup.moshi",
+        name = "moshi-kotlin",
+        version = Lib.MOSHI
+    )
+    kapt(
+        group = "com.squareup.moshi",
+        name = "moshi-kotlin-codegen",
+        version = Lib.MOSHI
+    )
+
+    implementation(
+        group="com.kohlschutter.junixsocket",
+        name="junixsocket-core",
+        version=Lib.JUNIXSOCKET
     )
 
     testImplementation(
