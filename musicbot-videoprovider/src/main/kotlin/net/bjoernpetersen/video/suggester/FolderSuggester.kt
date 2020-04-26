@@ -139,6 +139,10 @@ class FolderSuggester : Suggester {
     }
 
     override suspend fun getNextSuggestions(maxLength: Int): List<Song> {
+        if (nextSuggestions.isEmpty()) {
+            config.current.set(null)
+            throw BrokenSuggesterException("Suggestions are depleted")
+        }
         return nextSuggestions.subList(0, min(nextSuggestions.size, maxLength))
     }
 
@@ -152,12 +156,7 @@ class FolderSuggester : Suggester {
     }
 
     override suspend fun suggestNext(): Song {
-        val suggestion = nextSuggestions.firstOrNull()
-        if (suggestion == null) {
-            config.current.set(null)
-            throw BrokenSuggesterException("Suggestions are depleted")
-        }
-        return suggestion
+        return nextSuggestions.first()
     }
 
     override suspend fun close() = Unit
