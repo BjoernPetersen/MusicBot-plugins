@@ -113,17 +113,25 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
                             .execute()
                             .items
 
-                        partition
-                            .zip(videos) { (index, id), video -> Triple(index, id, video) }
-                            .forEach { (index, id, video) ->
-                                if (id != video.id) {
-                                    throw IOException("Not all songs found")
-                                }
-                                val song = createSong(video)
-                                val deferredSong = CompletableDeferred(song)
-                                result[index] = deferredSong
-                                songCache.put(song.id, deferredSong)
+                        if (videos.size != partition.size) {
+                            logger.warn {
+                                "Batch lookup result (${videos.size}) differs " +
+                                    "from request (${partition.size})"
                             }
+                        }
+
+                        val indexById = partition.associateBy({ it.value }, { it.index })
+                        for (video in videos) {
+                            val song = createSong(video)
+                            val deferredSong = CompletableDeferred(song)
+                            val index = indexById[video.id]
+                            if (index == null) {
+                                logger.warn { "Unexpected lookup result: $video.id" }
+                                continue
+                            }
+                            result[index] = deferredSong
+                            songCache.put(song.id, deferredSong)
+                        }
                     }
                 }
             } catch (e: IOException) {
@@ -133,7 +141,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
         }
 
         return withContext(coroutineContext) {
-            result.mapNotNull { it!!.await() }
+            result.mapNotNull { it?.await() }
         }
     }
 
