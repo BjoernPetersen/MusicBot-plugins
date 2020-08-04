@@ -16,7 +16,7 @@ foreach ($Name in $Names) {
     }
 
     [version]$V = $Version
-    $NewVersion = "{0}.{1}.{2}" -f $V.Major, ($V.Minor + 1), $V.Build
+    $NewVersion = "{0}.{1}.0" -f $V.Major, ($V.Minor + 1)
     if ($Snapshot) {
         $NewVersion = $NewVersion + "-SNAPSHOT"
     }
