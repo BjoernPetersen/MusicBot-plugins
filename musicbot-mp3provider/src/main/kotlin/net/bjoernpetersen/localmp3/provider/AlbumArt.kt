@@ -25,8 +25,9 @@ fun loadImage(path: Path): ImageData? {
         val tag = mp3File.id3v2Tag
         val image = tag.albumImage
         if (image != null) {
-            val type = tag.albumImageMimeType ?: "image/*"
-            return ImageData(type, image)
+            val type = tag.albumImageMimeType
+            val actualType = if (type.isNullOrBlank()) "image/*" else type
+            return ImageData(actualType, image)
         }
     }
     return null
