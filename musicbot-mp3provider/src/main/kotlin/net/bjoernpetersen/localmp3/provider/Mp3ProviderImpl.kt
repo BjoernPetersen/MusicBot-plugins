@@ -44,6 +44,7 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
 
     @Inject
     private lateinit var playbackFactory: Mp3PlaybackFactory
+
     @Inject
     private lateinit var fileStorage: FileStorage
     private lateinit var songById: Map<String, Song>
@@ -88,6 +89,10 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
         return withContext(coroutineContext) {
             playbackFactory.createPlayback(song.id.toPath().toFile())
         }
+    }
+
+    override fun getDirectory(): Path {
+        return config.folder.get() ?: throw IllegalStateException()
     }
 
     private suspend fun initializeSongs(

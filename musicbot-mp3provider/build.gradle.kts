@@ -37,6 +37,16 @@ dependencies {
         version = Lib.FUZZYWUZZY
     )
 
+    // Used for PlaylistMp3Suggester
+    implementation(
+        group = "com.github.bjoernpetersen",
+        name = "m3u-parser",
+        version = Lib.M3U_PARSER
+    ) {
+        exclude("org.jetbrains.kotlin")
+        exclude("org.slf4j")
+    }
+
     testImplementation(
         group = "com.github.bjoernpetersen",
         name = "musicbot",
