@@ -43,6 +43,7 @@ dependencies {
         name = "m3u-parser",
         version = Lib.M3U_PARSER
     ) {
+        isChanging = Lib.M3U_PARSER.contains("SNAPSHOT")
         exclude("org.jetbrains.kotlin")
         exclude("org.slf4j")
     }
