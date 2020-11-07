@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3PlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.UnsupportedAudioFileException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WavePlaybackFactory
@@ -21,7 +21,7 @@ class JavaFxPlaybackFactory : Mp3PlaybackFactory, WavePlaybackFactory {
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
     override fun createStateEntries(state: Config) = Unit
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) = Unit
+    override suspend fun initialize(progressFeedback: ProgressFeedback) = Unit
 
     @Throws(UnsupportedAudioFileException::class, IOException::class)
     override suspend fun createPlayback(inputFile: File): Playback {

@@ -21,7 +21,7 @@ import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.BrokenSuggesterException
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import java.io.IOException
 import java.nio.file.Path
 import java.util.Collections
@@ -80,24 +80,24 @@ class PlaylistMp3Suggester : Suggester, CoroutineScope by PluginScope() {
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
     override fun createStateEntries(state: Config) = Unit
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Loading entries from playlist file...")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Loading entries from playlist file...")
         val playlistPath = this.playlistPath.get()
             ?: throw InitializationException("No playlist file selected.")
 
-        val entries = loadRecursively(initStateWriter, playlistPath)
+        val entries = loadRecursively(progressFeedback, playlistPath)
 
-        initStateWriter.state("Mapping M3U entries to songs...")
-        allSongs = loadSongs(initStateWriter, entries)
-        initStateWriter.state("Found ${allSongs.size} songs from ${entries.size} M3U entries")
+        progressFeedback.state("Mapping M3U entries to songs...")
+        allSongs = loadSongs(progressFeedback, entries)
+        progressFeedback.state("Found ${allSongs.size} songs from ${entries.size} M3U entries")
     }
 
     private fun loadRecursively(
-        stateWriter: InitStateWriter,
+        feedback: ProgressFeedback,
         playlistPath: Path,
         result: MutableList<Path> = LinkedList()
     ): List<Path> {
-        stateWriter.state("Loading entries from file $playlistPath")
+        feedback.state("Loading entries from file $playlistPath")
 
         val entries = try {
             M3uParser.parse(playlistPath)
@@ -109,10 +109,10 @@ class PlaylistMp3Suggester : Suggester, CoroutineScope by PluginScope() {
             val location = it.location
             when {
                 location !is MediaPath -> {
-                    stateWriter.warning("Ignoring non-file entry: ${location.url}")
+                    feedback.warning("Ignoring non-file entry: ${location.url}")
                 }
                 location.path.extension.toLowerCase() == "m3u" -> {
-                    loadRecursively(stateWriter, location.path, result)
+                    loadRecursively(feedback, location.path, result)
                 }
                 else -> result.add(location.path)
             }
@@ -122,7 +122,7 @@ class PlaylistMp3Suggester : Suggester, CoroutineScope by PluginScope() {
     }
 
     private suspend fun loadSongs(
-        stateWriter: InitStateWriter,
+        feedback: ProgressFeedback,
         entries: List<Path>
     ): List<Song> {
         val songs: MutableList<Song> = ArrayList(entries.size)
@@ -133,7 +133,7 @@ class PlaylistMp3Suggester : Suggester, CoroutineScope by PluginScope() {
                 val song = provider.lookup(id)
                 songs.add(song)
             } catch (e: NoSuchSongException) {
-                stateWriter.warning("Song not found: $entry")
+                feedback.warning("Song not found: $entry")
             }
         }
 

@@ -11,7 +11,7 @@ import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.api.plugin.volume.Volume
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.musicbot.spi.plugin.volume.VolumeHandler
@@ -83,8 +83,8 @@ class SpotifyVolumeHandler : VolumeHandler, CoroutineScope {
         )
     }
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Trying to access client...")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Trying to access client...")
         val volume = try {
             getVolume()
         } catch (e: IOException) {
@@ -92,7 +92,7 @@ class SpotifyVolumeHandler : VolumeHandler, CoroutineScope {
         } catch (e: SpotifyWebApiException) {
             throw InitializationException(e)
         }
-        initStateWriter.state("Volume is $volume")
+        progressFeedback.state("Volume is $volume")
     }
 
     override suspend fun close() {

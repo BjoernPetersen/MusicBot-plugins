@@ -22,7 +22,7 @@ import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeProvider
@@ -61,8 +61,8 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
 
     @Suppress("MagicNumber")
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Creating API access object")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Creating API access object")
         api = YouTube
             .Builder(
                 NetHttpTransport(),

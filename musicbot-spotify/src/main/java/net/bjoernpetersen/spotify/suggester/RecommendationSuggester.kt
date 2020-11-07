@@ -22,7 +22,7 @@ import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.BrokenSuggesterException
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
 import net.bjoernpetersen.spotify.marketFromToken
@@ -80,9 +80,9 @@ class RecommendationSuggester : Suggester, CoroutineScope by PluginScope() {
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
         withContext(coroutineContext) {
-            initStateWriter.state("Trying to retrieve base song")
+            progressFeedback.state("Trying to retrieve base song")
             baseSong = try {
                 lookupBaseSong()
             } catch (e: NoSuchSongException) {
@@ -91,7 +91,7 @@ class RecommendationSuggester : Suggester, CoroutineScope by PluginScope() {
                 throw InitializationException(e)
             }
 
-            initStateWriter.state("Filling suggestions")
+            progressFeedback.state("Filling suggestions")
             fillNextSongs()
 
             if (nextSongs.isEmpty()) {

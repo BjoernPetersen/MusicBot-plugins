@@ -20,7 +20,7 @@ import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
@@ -62,8 +62,8 @@ class SpotifyProviderImpl : SpotifyProvider, CoroutineScope {
             .build()
     }
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Trying to access API")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Trying to access API")
         getApi()
 
         songCache = CacheBuilder.newBuilder()

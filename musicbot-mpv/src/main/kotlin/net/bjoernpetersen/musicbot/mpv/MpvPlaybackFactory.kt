@@ -28,7 +28,7 @@ import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AacPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AacStreamPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AviPlaybackFactory
@@ -95,19 +95,19 @@ class MpvPlaybackFactory :
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Testing executable...")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Testing executable...")
         withContext(coroutineContext) {
             try {
                 @Suppress("BlockingMethodInNonBlockingContext")
                 ProcessBuilder(EXECUTABLE, "-h", "--no-config").start()
             } catch (e: IOException) {
-                initStateWriter.warning("Failed to start mpv.")
+                progressFeedback.warning("Failed to start mpv.")
                 throw InitializationException(e)
             }
         }
 
-        initStateWriter.state("Retrieving plugin dir...")
+        progressFeedback.state("Retrieving plugin dir...")
         cmdFileDir = fileStorage.forPlugin(this, true)
     }
 

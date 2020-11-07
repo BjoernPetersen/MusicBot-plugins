@@ -19,7 +19,7 @@ import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.gplaymusic.GPlayMusicProvider
 import java.io.IOException
 import java.util.LinkedList
@@ -67,7 +67,7 @@ class GPlayMusicLastPlayedSuggester :
     }
 
     @Throws(InitializationException::class)
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
         recentlyPlayedSongs = LinkedList()
         suggestions = LinkedList()
 

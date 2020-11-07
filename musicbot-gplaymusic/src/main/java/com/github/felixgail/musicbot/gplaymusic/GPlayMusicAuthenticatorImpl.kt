@@ -12,7 +12,7 @@ import net.bjoernpetersen.musicbot.api.config.serialization
 import net.bjoernpetersen.musicbot.api.config.serialized
 import net.bjoernpetersen.musicbot.api.config.string
 import net.bjoernpetersen.musicbot.api.plugin.InitializationException
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.gplaymusic.GPlayMusicAuthenticator
 import svarzee.gps.gpsoauth.AuthToken
@@ -76,17 +76,17 @@ class GPlayMusicAuthenticatorImpl : GPlayMusicAuthenticator {
         return listOf(password, androidID)
     }
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Logging into GPlayMusic")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Logging into GPlayMusic")
         token = tokenEntry.get()
         withContext(Dispatchers.IO) {
             try {
-                refreshToken(initStateWriter)
+                refreshToken(progressFeedback)
             } catch (e: IOException) {
-                initStateWriter.warning("Logging into GPlayMusic failed!")
+                progressFeedback.warning("Logging into GPlayMusic failed!")
                 throw InitializationException(e)
             } catch (e: Gpsoauth.TokenRequestFailed) {
-                initStateWriter.warning("Logging into GPlayMusic failed!")
+                progressFeedback.warning("Logging into GPlayMusic failed!")
                 throw InitializationException(e)
             }
         }
@@ -103,12 +103,12 @@ class GPlayMusicAuthenticatorImpl : GPlayMusicAuthenticator {
     }
 
     @Throws(IOException::class, Gpsoauth.TokenRequestFailed::class)
-    private suspend fun refreshToken(initStateWriter: InitStateWriter? = null): AuthToken {
+    private suspend fun refreshToken(progressFeedback: ProgressFeedback? = null): AuthToken {
         var authToken = token
         if (authToken != null && authToken.isValid()) {
-            initStateWriter?.state("Found existing token.")
+            progressFeedback?.state("Found existing token.")
         } else {
-            initStateWriter?.state("Fetching new token.")
+            progressFeedback?.state("Fetching new token.")
             val diffLastRequest = System.currentTimeMillis() - TokenProvider.getLastTokenFetched()
             val remainingMillis = tokenCooldownMillis - diffLastRequest
             if (remainingMillis > 0) delay(remainingMillis)

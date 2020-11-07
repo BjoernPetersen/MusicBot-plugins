@@ -16,7 +16,7 @@ import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeProvider
 import javax.inject.Inject
@@ -53,7 +53,7 @@ class YouTubePlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispat
 
     override fun createStateEntries(state: Config) = Unit
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
         withContext(coroutineContext) {
 
             api = YouTube
@@ -70,7 +70,7 @@ class YouTubePlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispat
             }
 
             val playlistId = config.playlistId.get()!!
-            initStateWriter.state("Loading playlist info")
+            progressFeedback.state("Loading playlist info")
             val playlistResponse = api.Playlists().list(PLAYLIST_PARTS).apply {
                 key = auth.getToken()
                 id = playlistId
@@ -95,7 +95,7 @@ class YouTubePlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispat
             )
 
             if (config.shuffle.get()) {
-                initStateWriter.state("Shuffling playlist (may take a while)")
+                progressFeedback.state("Shuffling playlist (may take a while)")
                 playlist.shuffle()
             }
         }

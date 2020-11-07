@@ -3,7 +3,7 @@ package net.bjoernpetersen.musicbot.sysvolume
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.bjoernpetersen.musicbot.api.config.Config
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.volume.VolumeHandler
 import net.bjoernpetersen.volctl.VolumeControl
 
@@ -19,7 +19,7 @@ class NativeSysVolumeHandler : VolumeHandler {
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
     override fun createStateEntries(state: Config) = Unit
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
         withContext(Dispatchers.IO) {
             volumeControl = VolumeControl.newInstanceWithClassLoaderSupport()
         }

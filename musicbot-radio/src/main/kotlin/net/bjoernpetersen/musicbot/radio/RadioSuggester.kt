@@ -11,7 +11,7 @@ import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import java.nio.file.Files
 import java.util.Base64
 import javax.inject.Inject
@@ -65,7 +65,7 @@ class RadioSuggester : Suggester {
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
     override fun createStateEntries(state: Config) = Unit
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
         song = radioStation.get() ?: throw InitializationException("radioStation not set")
     }
 

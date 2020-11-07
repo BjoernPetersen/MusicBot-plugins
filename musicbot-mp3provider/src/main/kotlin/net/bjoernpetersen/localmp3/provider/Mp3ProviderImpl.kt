@@ -22,7 +22,7 @@ import net.bjoernpetersen.musicbot.spi.image.ImageData
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3PlaybackFactory
 import net.bjoernpetersen.musicbot.spi.util.FileStorage
 import java.nio.file.Files
@@ -67,15 +67,15 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
     override fun createStateEntries(state: Config) = Unit
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Initializing...")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Initializing...")
         val folder = config.folder.get() ?: throw InitializationException()
         withContext(coroutineContext) {
-            initStateWriter.state("Looking for songs...")
+            progressFeedback.state("Looking for songs...")
             val start = Instant.now()
-            songById = initializeSongs(initStateWriter, folder, config.recursive.get())
+            songById = initializeSongs(progressFeedback, folder, config.recursive.get())
             val duration = Duration.between(start, Instant.now())
-            initStateWriter.state("Done (found ${songById.size} in ${duration.seconds} seconds).")
+            progressFeedback.state("Done (found ${songById.size} in ${duration.seconds} seconds).")
         }
     }
 
@@ -96,13 +96,13 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
     }
 
     private suspend fun initializeSongs(
-        initWriter: InitStateWriter,
+        feedback: ProgressFeedback,
         root: Path,
         recursive: Boolean
     ): Map<String, Song> {
         val indexDir = fileStorage.forPlugin(this).toPath()
         return Index(this, indexDir, root).use {
-            it.load(initWriter, recursive)
+            it.load(feedback, recursive)
         }
     }
 

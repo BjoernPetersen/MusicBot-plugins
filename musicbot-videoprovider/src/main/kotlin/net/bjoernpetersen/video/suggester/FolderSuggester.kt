@@ -16,7 +16,7 @@ import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.BrokenSuggesterException
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.video.provider.VideoProvider
 import net.bjoernpetersen.video.provider.toId
 import java.nio.file.Files
@@ -102,15 +102,15 @@ class FolderSuggester : Suggester {
 
     override fun createStateEntries(state: Config) = Unit
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Loading songs...")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Loading songs...")
         val songs = loadSongs()
         songById = songs.associateBy { it.id }
         nextSuggestions = songs
         if (nextSuggestions.isEmpty())
             throw InitializationException("No songs found")
 
-        initStateWriter.state("Restoring state")
+        progressFeedback.state("Restoring state")
         val currentId = config.current.get()
         if (currentId != null) {
             val index = nextSuggestions.indexOfFirst { it.id == currentId }

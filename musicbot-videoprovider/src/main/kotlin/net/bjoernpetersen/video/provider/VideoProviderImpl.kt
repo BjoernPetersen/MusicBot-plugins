@@ -26,7 +26,7 @@ import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.AviPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.FilePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.MkvPlaybackFactory
@@ -103,15 +103,15 @@ class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatche
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
     override fun createStateEntries(state: Config) = Unit
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Initializing...")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Initializing...")
         val folder = folder.get() ?: throw InitializationException()
         withContext(coroutineContext) {
-            initStateWriter.state("Looking for songs...")
+            progressFeedback.state("Looking for songs...")
             val start = Instant.now()
-            songById = initializeSongs(initStateWriter, folder, recursive.get())
+            songById = initializeSongs(progressFeedback, folder, recursive.get())
             val duration = Duration.between(start, Instant.now())
-            initStateWriter.state("Done (found ${songById.size} in ${duration.seconds} seconds).")
+            progressFeedback.state("Done (found ${songById.size} in ${duration.seconds} seconds).")
         }
     }
 
@@ -129,25 +129,25 @@ class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatche
     }
 
     private suspend fun initializeSongs(
-        initWriter: InitStateWriter,
+        feedback: ProgressFeedback,
         root: Path,
         recursive: Boolean
     ): Map<String, Song> =
         (if (recursive) Files.walk(root).asSequence() else Files.list(root).asSequence())
             .filter { Files.isRegularFile(it) }
             .filter { it.extension.toLowerCase(Locale.US) in playback.supported }
-            .map { createSongAsync(initWriter, it) }
+            .map { createSongAsync(feedback, it) }
             .toList().awaitAll()
             .filterNotNull()
             .associateBy(Song::id) { it }
 
-    private fun createSongAsync(initWriter: InitStateWriter, path: Path): Deferred<Song?> = async {
+    private fun createSongAsync(feedback: ProgressFeedback, path: Path): Deferred<Song?> = async {
         logger.debug { "Loading tag for '$path'" }
         createSong(path).also {
             if (it == null) {
-                initWriter.warning("Could not load song from '$path'")
+                feedback.warning("Could not load song from '$path'")
             } else {
-                initWriter.state("""Loaded song ${it.title}""")
+                feedback.state("""Loaded song ${it.title}""")
             }
         }
     }

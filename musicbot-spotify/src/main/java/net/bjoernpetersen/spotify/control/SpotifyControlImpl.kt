@@ -15,7 +15,7 @@ import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
 import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.plugin.InitializationException
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import javax.inject.Inject
@@ -74,8 +74,8 @@ class SpotifyControlImpl : SpotifyControl, CoroutineScope {
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
     override fun createStateEntries(state: Config) = Unit
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Checking device config")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Checking device config")
         if (device.get() == null) {
             throw InitializationException("No device selected")
         }

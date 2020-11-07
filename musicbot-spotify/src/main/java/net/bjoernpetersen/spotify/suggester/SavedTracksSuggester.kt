@@ -18,7 +18,7 @@ import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.BrokenSuggesterException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
@@ -71,14 +71,14 @@ class SavedTracksSuggester : Suggester, CoroutineScope by PluginScope(Dispatcher
         auth.requireScopes(SpotifyScope.USER_LIBRARY_READ)
     }
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
         withContext(coroutineContext) {
-            initStateWriter.state("Loading user ID")
+            progressFeedback.state("Loading user ID")
             if (userId.get() == null) {
                 userId.set(loadUserId())
             }
 
-            initStateWriter.state("Loading saved tracks")
+            progressFeedback.state("Loading saved tracks")
             playlistSongs = loadPlaylist()
                 .let { if (shuffle.get()) it.shuffled() else it }
                 .also { logger.info { "Loaded ${it.size} songs" } }

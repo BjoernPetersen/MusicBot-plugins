@@ -11,7 +11,7 @@ import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -48,8 +48,8 @@ class SongRepeatSuggester : Suggester, CoroutineScope {
     override suspend fun dislike(song: Song) = Unit
 
     @Throws(InitializationException::class)
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Looking up song")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Looking up song")
         try {
             song = songUrl.get()?.let { getSongId(it) }?.let { provider.lookup(it) }
                 ?: throw InitializationException("Could not find song")

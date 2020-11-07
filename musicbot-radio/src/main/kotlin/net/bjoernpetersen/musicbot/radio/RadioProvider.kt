@@ -20,7 +20,7 @@ import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.Provider
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3StreamPlaybackFactory
 import java.net.URL
 import java.nio.file.Files
@@ -80,9 +80,9 @@ class RadioProvider : Provider, CoroutineScope by PluginScope(Dispatchers.IO) {
         }
     }
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
         withContext(coroutineContext) {
-            initStateWriter.state("Parsing playlist file")
+            progressFeedback.state("Parsing playlist file")
             entries = M3uParser.parse(playlistFile.get()!!).filter { it.title != null }
             songs = entries.mapIndexed { index, entry ->
                 createSong(index.toString(), entry.title!!)

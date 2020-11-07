@@ -29,7 +29,7 @@ import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3PlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.UnsupportedAudioFileException
@@ -110,11 +110,11 @@ class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
 
     @Throws(InitializationException::class)
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Obtaining storage dir")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Obtaining storage dir")
         fileDir = File(fileStorage.forPlugin(this, true), "songs/")
 
-        initStateWriter.state("Creating cache")
+        progressFeedback.state("Creating cache")
         cachedSongs = CacheBuilder.newBuilder()
             .expireAfterAccess(cacheTime.get()!!.toLong(), TimeUnit.MINUTES)
             .initialCapacity(CACHE_INITIAL_CAPACITY)

@@ -14,7 +14,7 @@ import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.image.AlbumArtSupplier
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -34,15 +34,15 @@ class Index(
     private val logger = KotlinLogging.logger { }
     private val db = IndexDb(provider, indexDir.resolve("index.db"))
 
-    suspend fun load(writer: InitStateWriter, recursive: Boolean): Map<String, Song> {
+    suspend fun load(feedback: ProgressFeedback, recursive: Boolean): Map<String, Song> {
         return withContext(coroutineContext) {
-            writer.state("Loading songs from index...")
+            feedback.state("Loading songs from index...")
             val indexSongs = db.readAll()
 
             @Suppress("MagicNumber")
             val foundSongs = ConcurrentHashMap<String, Song>(maxOf(256, indexSongs.size * 2))
 
-            writer.state("Loading songs from disk...")
+            feedback.state("Loading songs from disk...")
             coroutineScope {
                 (if (recursive) Files.walk(songDir) else Files.list(songDir))
                     .asSequence()
@@ -53,7 +53,7 @@ class Index(
                         val indexed = indexSongs[id]
                         if (indexed != null) foundSongs[id] = indexed
                         else launch {
-                            val song = createSong(writer, path)
+                            val song = createSong(feedback, path)
                             if (song != null) foundSongs[id] = song
                         }
                     }
@@ -80,13 +80,13 @@ class Index(
         }
     }
 
-    private fun createSong(initWriter: InitStateWriter, path: Path): Song? {
+    private fun createSong(feedback: ProgressFeedback, path: Path): Song? {
         logger.debug { "Loading tag for '$path'" }
         return createSong(path).also {
             if (it == null) {
-                initWriter.warning("Could not load song from '$path'")
+                feedback.warning("Could not load song from '$path'")
             } else {
-                initWriter.state("""Loaded song ${it.title}""")
+                feedback.state("""Loaded song ${it.title}""")
                 launch {
                     logger.debug { "Writing to db: ${it.title}" }
                     db.write(it)

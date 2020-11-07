@@ -14,7 +14,7 @@ import net.bjoernpetersen.musicbot.api.plugin.Base
 import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.plugin.GenericPlugin
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.gplaymusic.GPlayMusicAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeProvider
 import com.github.felixgail.gplaymusic.exceptions.InitializationException as GPlayMusicInitializationException
@@ -53,13 +53,13 @@ class GPlayMusicApi : GenericPlugin, CoroutineScope by PluginScope(Dispatchers.I
 
     override fun createSecretEntries(secrets: Config): List<Config.Entry<*>> = emptyList()
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Trying to log in...")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Trying to log in...")
 
         api = try {
             createApi()
         } catch (e: GPlayMusicInitializationException) {
-            initStateWriter.warning("Could not log in, trying to retrieve new token")
+            progressFeedback.warning("Could not log in, trying to retrieve new token")
             auth.invalidateToken()
             try {
                 createApi()

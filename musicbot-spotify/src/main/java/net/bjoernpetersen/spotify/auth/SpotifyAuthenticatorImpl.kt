@@ -21,7 +21,7 @@ import net.bjoernpetersen.musicbot.api.config.serialization
 import net.bjoernpetersen.musicbot.api.config.serialized
 import net.bjoernpetersen.musicbot.api.config.string
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
@@ -137,10 +137,10 @@ class SpotifyAuthenticatorImpl :
         }
     }
 
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Retrieving token...")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Retrieving token...")
         withContext(coroutineContext) {
-            getToken().also { initStateWriter.state("Retrieved token.") }
+            getToken().also { progressFeedback.state("Retrieved token.") }
         }
     }
 

@@ -10,7 +10,7 @@ import net.bjoernpetersen.musicbot.api.loader.NoResource
 import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.loader.Resource
 import net.bjoernpetersen.musicbot.spi.plugin.Playback
-import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import net.bjoernpetersen.musicbot.spi.plugin.management.ProgressFeedback
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
@@ -45,8 +45,8 @@ class WebApiSpotifyPlaybackFactory : SpotifyPlaybackFactory, CoroutineScope {
     }
 
     @Throws(InitializationException::class)
-    override suspend fun initialize(initStateWriter: InitStateWriter) {
-        initStateWriter.state("Checking authentication")
+    override suspend fun initialize(progressFeedback: ProgressFeedback) {
+        progressFeedback.state("Checking authentication")
         try {
             authenticator.getToken()
         } catch (e: IOException) {
