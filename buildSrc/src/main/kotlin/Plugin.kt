@@ -1,8 +1,10 @@
 object Plugin {
-    const val SPOTLESS = "3.27.2"
-    const val DETEKT = "1.6.0"
-    const val VERSIONS = "0.28.0"
+    const val SPOTLESS = "5.7.0"
+    const val KTLINT = "0.39.0"
+    const val DETEKT = "1.14.2"
 
-    const val KOTLIN = "1.3.70"
-    const val SHADOW_JAR = "5.2.0"
+    const val VERSIONS = "0.34.0"
+
+    const val KOTLIN = "1.4.10"
+    const val SHADOW_JAR = "6.1.0"
 }

@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version Plugin.KOTLIN
     id("com.github.ben-manes.versions") version Plugin.VERSIONS
-    id("com.diffplug.gradle.spotless") version Plugin.SPOTLESS
+    id("com.diffplug.spotless") version Plugin.SPOTLESS
     id("io.gitlab.arturbosch.detekt") version Plugin.DETEKT
     idea
 }
@@ -20,18 +20,18 @@ tasks {
 allprojects {
     group = "com.github.bjoernpetersen"
 
-    apply(plugin = "com.diffplug.gradle.spotless")
+    apply(plugin = "com.diffplug.spotless")
     apply(plugin = "io.gitlab.arturbosch.detekt")
     apply(plugin = "idea")
 
     spotless {
         kotlin {
-            ktlint()
+            ktlint(Plugin.KTLINT)
             lineEndings = LineEnding.UNIX
             endWithNewline()
         }
         kotlinGradle {
-            ktlint()
+            ktlint(Plugin.KTLINT)
             lineEndings = LineEnding.UNIX
             endWithNewline()
         }
