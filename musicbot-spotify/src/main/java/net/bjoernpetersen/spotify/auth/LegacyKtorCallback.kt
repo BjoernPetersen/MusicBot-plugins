@@ -14,32 +14,34 @@ import io.ktor.routing.routing
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.util.KtorExperimentalAPI
-import io.ktor.util.toMap
+import io.ktor.util.getOrFail
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.net.URL
 import java.time.Duration
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 
+@Deprecated("Shouldn't be used anymore")
 @OptIn(KtorExperimentalAPI::class)
-internal class KtorCallback(private val port: Int) {
+internal class LegacyKtorCallback(private val port: Int) {
 
     val callbackUrl = URL("http", LOCALHOST, port, CALLBACK_PATH)
 
-    suspend fun start(state: String): Map<String, String> {
-        val result = CompletableDeferred<Map<String, String>>()
+    suspend fun start(state: String): Token {
+        val result = CompletableDeferred<Token>()
         val server = embeddedServer(CIO, port = port, host = LOCALHOST) {
             routing {
                 install(StatusPages) {
-                    exception<AuthenticationException> {
+                    exception<LegacyAuthenticationException> {
                         call.respond(HttpStatusCode.Unauthorized)
                     }
                     exception<MissingRequestParameterException> {
                         call.respond(HttpStatusCode.BadRequest)
 
-                        result.completeExceptionally(InvalidTokenException())
+                        result.completeExceptionally(LegacyInvalidTokenException())
                     }
                 }
 
@@ -53,15 +55,16 @@ internal class KtorCallback(private val port: Int) {
                     val params = call.request.queryParameters
 
                     if (params[STATE_KEY] != state)
-                        throw AuthenticationException("Invalid state")
+                        throw LegacyAuthenticationException("Invalid state")
 
-                    val paramMap = params.toMap()
-                        .filterKeys { it != STATE_KEY }
-                        .mapValues { it.value.singleOrNull() ?: throw InvalidTokenException() }
+                    val token = params.getOrFail(ACCESS_TOKEN_KEY)
+                    val expirationTime = params.getOrFail(EXPIRATION_KEY)
+                        .let { Integer.parseUnsignedInt(it).toLong() }
+                        .let { Instant.now().plusSeconds(it) }
 
                     call.respondText("Received OAuth token. You may close this window now.")
 
-                    result.complete(paramMap)
+                    result.complete(Token(token, expirationTime))
                 }
             }
         }
@@ -72,7 +75,7 @@ internal class KtorCallback(private val port: Int) {
             val cancelJob = launch {
                 delay(Duration.ofMinutes(1).toMillis())
                 if (serverJob.isActive) {
-                    result.completeExceptionally(TimeoutTokenException())
+                    result.completeExceptionally(LegacyTimeoutTokenException())
                 }
             }
 
@@ -109,11 +112,15 @@ internal class KtorCallback(private val port: Int) {
     }
 }
 
+@Deprecated("Shouldn't be used anymore")
 @KtorExperimentalAPI
-private class AuthenticationException(
+private class LegacyAuthenticationException(
     message: String,
     cause: Throwable? = null
 ) : BadRequestException(message, cause)
 
-class InvalidTokenException : Exception()
-class TimeoutTokenException : Exception()
+@Deprecated("Shouldn't be used anymore")
+class LegacyInvalidTokenException : Exception()
+
+@Deprecated("Shouldn't be used anymore")
+class LegacyTimeoutTokenException : Exception()

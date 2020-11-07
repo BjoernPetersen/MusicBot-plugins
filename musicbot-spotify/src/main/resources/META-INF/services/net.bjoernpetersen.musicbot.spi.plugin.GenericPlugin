@@ -1,3 +1,4 @@
+net.bjoernpetersen.spotify.auth.PkceAuthCodeSpotifyAuthenticatorImpl
 net.bjoernpetersen.spotify.auth.SpotifyAuthenticatorImpl
 net.bjoernpetersen.spotify.control.SpotifyControlImpl
 net.bjoernpetersen.spotify.volume.SpotifyVolumeHandler

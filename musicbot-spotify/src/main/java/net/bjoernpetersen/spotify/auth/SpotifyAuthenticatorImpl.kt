@@ -29,7 +29,6 @@ import net.bjoernpetersen.musicbot.spi.util.BrowserOpener
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URL
-import java.security.SecureRandom
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -37,6 +36,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import javax.inject.Inject
 
+@Deprecated("Shouldn't be used anymore")
 @Suppress("TooManyFunctions")
 @OptIn(ObsoleteCoroutinesApi::class)
 class SpotifyAuthenticatorImpl :
@@ -45,7 +45,7 @@ class SpotifyAuthenticatorImpl :
 
     private val logger = KotlinLogging.logger { }
 
-    override val name: String = "Desktop OAuth"
+    override val name: String = "Legacy Desktop OAuth"
     override val description: String = "Performs Implicit Grant OAuth flow by opening a browser"
 
     @Inject
@@ -122,15 +122,15 @@ class SpotifyAuthenticatorImpl :
             if (currentToken !== prevToken) currentToken!!
             else try {
                 val state = generateRandomString()
-                val callback = KtorCallback(port.get()!!)
+                val callback = LegacyKtorCallback(port.get()!!)
                 val callbackJob = async(Dispatchers.IO) { callback.start(state) }
                 val url = getSpotifyUrl(state, callback.callbackUrl)
                 browserOpener.openDocument(url)
                 callbackJob.await()
-            } catch (e: TimeoutTokenException) {
+            } catch (e: LegacyTimeoutTokenException) {
                 logger.error { "No token received within one minute" }
                 throw TokenRefreshException(e)
-            } catch (e: InvalidTokenException) {
+            } catch (e: LegacyInvalidTokenException) {
                 logger.error(e) { "Invalid token response received" }
                 throw TokenRefreshException(e)
             }
@@ -220,9 +220,4 @@ class SpotifyAuthenticatorImpl :
         const val MIN_PORT = 1024
         const val MAX_PORT = 65535
     }
-}
-
-private val random = SecureRandom()
-private fun generateRandomString(): String {
-    return random.nextInt(Int.MAX_VALUE).toString()
 }
