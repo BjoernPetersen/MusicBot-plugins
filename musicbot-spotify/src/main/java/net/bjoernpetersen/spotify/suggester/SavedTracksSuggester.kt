@@ -2,10 +2,6 @@ package net.bjoernpetersen.spotify.suggester
 
 import com.wrapper.spotify.SpotifyApi
 import com.wrapper.spotify.exceptions.SpotifyWebApiException
-import java.util.LinkedList
-import javax.inject.Inject
-import kotlin.math.max
-import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -27,6 +23,10 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenti
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyProvider
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.spotify.marketFromToken
+import java.util.LinkedList
+import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 @Suppress("TooManyFunctions")
 @IdBase("Spotify saved tracks")

@@ -2,11 +2,11 @@ package net.bjoernpetersen.localmp3.provider
 
 import com.mpatric.mp3agic.BaseException
 import com.mpatric.mp3agic.Mp3File
+import mu.KotlinLogging
+import net.bjoernpetersen.musicbot.spi.image.ImageData
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
-import mu.KotlinLogging
-import net.bjoernpetersen.musicbot.spi.image.ImageData
 
 private val logger = KotlinLogging.logger { }
 

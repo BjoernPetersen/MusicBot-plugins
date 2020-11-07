@@ -1,11 +1,11 @@
 package net.bjoernpetersen.javafxplayback
 
-import java.io.File
-import java.io.IOException
 import javafx.scene.media.Media
 import javafx.scene.media.MediaException
 import javafx.scene.media.MediaPlayer
 import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
+import java.io.File
+import java.io.IOException
 
 internal class JavaFxPlayback
 @Throws(IOException::class, MediaException::class) constructor(

@@ -1,10 +1,5 @@
 package net.bjoernpetersen.video.suggester
 
-import java.nio.file.Files
-import java.nio.file.Path
-import javax.inject.Inject
-import kotlin.math.min
-import kotlin.streams.asSequence
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.config.Config
@@ -24,6 +19,11 @@ import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.video.provider.VideoProvider
 import net.bjoernpetersen.video.provider.toId
+import java.nio.file.Files
+import java.nio.file.Path
+import javax.inject.Inject
+import kotlin.math.min
+import kotlin.streams.asSequence
 
 private class FolderSuggesterConfig(config: Config, provider: VideoProvider) {
     val directory by config.serialized<Path> {

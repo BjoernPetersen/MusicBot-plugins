@@ -2,16 +2,6 @@ package net.bjoernpetersen.localmp3.provider
 
 import com.mpatric.mp3agic.BaseException
 import com.mpatric.mp3agic.Mp3File
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Path
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.PreparedStatement
-import java.sql.SQLException
-import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
-import kotlin.streams.asSequence
 import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +15,16 @@ import net.bjoernpetersen.musicbot.api.player.song
 import net.bjoernpetersen.musicbot.api.plugin.PluginScope
 import net.bjoernpetersen.musicbot.spi.image.AlbumArtSupplier
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.PreparedStatement
+import java.sql.SQLException
+import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.streams.asSequence
 
 class Index(
     private val provider: AlbumArtSupplier,

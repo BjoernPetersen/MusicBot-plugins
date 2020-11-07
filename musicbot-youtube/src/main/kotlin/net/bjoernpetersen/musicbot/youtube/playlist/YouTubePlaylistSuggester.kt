@@ -3,7 +3,6 @@ package net.bjoernpetersen.musicbot.youtube.playlist
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.youtube.YouTube
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -20,6 +19,7 @@ import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeProvider
+import javax.inject.Inject
 
 @IdBase("YouTube playlist")
 class YouTubePlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.IO) {

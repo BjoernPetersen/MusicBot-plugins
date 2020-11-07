@@ -1,12 +1,6 @@
 package net.bjoernpetersen.video.provider
 
 import com.google.inject.Inject
-import java.nio.file.Files
-import java.nio.file.Path
-import java.time.Duration
-import java.time.Instant
-import java.util.Locale
-import kotlin.streams.asSequence
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +31,12 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.AviPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.FilePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.MkvPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp4PlaybackFactory
+import java.nio.file.Files
+import java.nio.file.Path
+import java.time.Duration
+import java.time.Instant
+import java.util.Locale
+import kotlin.streams.asSequence
 
 @Suppress("TooManyFunctions")
 class VideoProviderImpl : VideoProvider, CoroutineScope by PluginScope(Dispatchers.IO) {

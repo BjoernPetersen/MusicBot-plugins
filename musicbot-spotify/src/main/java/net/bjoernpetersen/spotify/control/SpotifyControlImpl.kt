@@ -3,8 +3,6 @@ package net.bjoernpetersen.spotify.control
 import com.wrapper.spotify.SpotifyApi
 import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import com.wrapper.spotify.model_objects.miscellaneous.Device
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,6 +18,8 @@ import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 class SpotifyControlImpl : SpotifyControl, CoroutineScope {
 

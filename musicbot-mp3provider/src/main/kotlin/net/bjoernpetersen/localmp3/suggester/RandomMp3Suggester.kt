@@ -1,7 +1,5 @@
 package net.bjoernpetersen.localmp3.suggester
 
-import java.util.LinkedList
-import javax.inject.Inject
 import net.bjoernpetersen.localmp3.provider.Mp3Provider
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.TextBox
@@ -12,6 +10,8 @@ import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.BrokenSuggesterException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import java.util.LinkedList
+import javax.inject.Inject
 
 @IdBase("Random local MP3s")
 class RandomMp3Suggester : Suggester {

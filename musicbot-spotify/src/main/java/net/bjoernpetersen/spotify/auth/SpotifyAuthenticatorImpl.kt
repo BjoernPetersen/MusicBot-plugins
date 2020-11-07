@@ -2,16 +2,6 @@ package net.bjoernpetersen.spotify.auth
 
 import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import io.ktor.http.encodeURLParameter
-import java.io.IOException
-import java.net.MalformedURLException
-import java.net.URL
-import java.security.SecureRandom
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -36,10 +26,21 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.musicbot.spi.util.BrowserOpener
+import java.io.IOException
+import java.net.MalformedURLException
+import java.net.URL
+import java.security.SecureRandom
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
 @OptIn(ObsoleteCoroutinesApi::class)
-class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
+class SpotifyAuthenticatorImpl :
+    SpotifyAuthenticator,
     CoroutineScope by PluginScope(newSingleThreadContext("SpotifyAuth")) {
 
     private val logger = KotlinLogging.logger { }
@@ -98,15 +99,17 @@ class SpotifyAuthenticatorImpl : SpotifyAuthenticator,
 
     private fun getSpotifyUrl(state: String, redirectUrl: URL): URL {
         try {
-            return URL(SPOTIFY_URL.let { base ->
-                listOf(
-                    "client_id=$CLIENT_ID",
-                    "redirect_uri=${redirectUrl.toExternalForm().encodeURLParameter()}",
-                    "response_type=token",
-                    "scope=${scopes.joinToString(" ").encodeURLParameter()}",
-                    "state=$state"
-                ).joinToString("&", prefix = "$base?")
-            })
+            return URL(
+                SPOTIFY_URL.let { base ->
+                    listOf(
+                        "client_id=$CLIENT_ID",
+                        "redirect_uri=${redirectUrl.toExternalForm().encodeURLParameter()}",
+                        "response_type=token",
+                        "scope=${scopes.joinToString(" ").encodeURLParameter()}",
+                        "state=$state"
+                    ).joinToString("&", prefix = "$base?")
+                }
+            )
         } catch (e: MalformedURLException) {
             throw IllegalArgumentException(e)
         }

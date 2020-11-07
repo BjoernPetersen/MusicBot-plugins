@@ -1,7 +1,6 @@
 package com.github.felixgail.musicbot.gplaymusic
 
 import com.github.felixgail.gplaymusic.model.Track
-import java.time.Duration
 import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.player.song
@@ -9,6 +8,7 @@ import net.bjoernpetersen.musicbot.api.plugin.NamedPlugin
 import net.bjoernpetersen.musicbot.api.plugin.pluginId
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.gplaymusic.GPlayMusicProvider
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeProvider
+import java.time.Duration
 
 private val logger = KotlinLogging.logger { }
 

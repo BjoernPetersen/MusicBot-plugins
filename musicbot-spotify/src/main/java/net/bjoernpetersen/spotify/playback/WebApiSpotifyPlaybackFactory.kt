@@ -1,7 +1,5 @@
 package net.bjoernpetersen.spotify.playback
 
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,6 +15,8 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenti
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.spotify.control.SpotifyControl
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 class WebApiSpotifyPlaybackFactory : SpotifyPlaybackFactory, CoroutineScope {
 

@@ -1,8 +1,6 @@
 package com.github.felixgail.musicbot.gplaymusic
 
 import com.github.felixgail.gplaymusic.util.TokenProvider
-import java.io.IOException
-import java.time.Instant
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -19,6 +17,8 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.gplaymusic.GPlayMusicAuthenticator
 import svarzee.gps.gpsoauth.AuthToken
 import svarzee.gps.gpsoauth.Gpsoauth
+import java.io.IOException
+import java.time.Instant
 
 class GPlayMusicAuthenticatorImpl : GPlayMusicAuthenticator {
     override val name: String = "gpsoauth"

@@ -3,15 +3,6 @@ package net.bjoernpetersen.musicbot.mpv
 import com.zaxxer.nuprocess.NuAbstractProcessHandler
 import com.zaxxer.nuprocess.NuProcess
 import com.zaxxer.nuprocess.NuProcessBuilder
-import java.io.BufferedWriter
-import java.io.File
-import java.io.IOException
-import java.net.URL
-import java.nio.ByteBuffer
-import java.nio.CharBuffer
-import java.time.Duration
-import java.util.LinkedList
-import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -54,6 +45,15 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.WaveStreamPlaybackFacto
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.WmvPlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.util.FileStorage
+import java.io.BufferedWriter
+import java.io.File
+import java.io.IOException
+import java.net.URL
+import java.nio.ByteBuffer
+import java.nio.CharBuffer
+import java.time.Duration
+import java.util.LinkedList
+import javax.inject.Inject
 
 private const val EXECUTABLE = "mpv"
 

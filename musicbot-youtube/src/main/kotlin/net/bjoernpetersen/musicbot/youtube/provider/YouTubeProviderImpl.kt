@@ -8,13 +8,6 @@ import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.SearchResult
 import com.google.api.services.youtube.model.Video
 import com.google.common.collect.Lists
-import java.io.IOException
-import java.time.Duration
-import java.util.ArrayList
-import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import kotlin.math.max
-import kotlin.math.min
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -34,6 +27,13 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeAuthenti
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubePlaybackFactory
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeProvider
 import net.bjoernpetersen.musicbot.youtube.cache.AsyncLoader
+import java.io.IOException
+import java.time.Duration
+import java.util.ArrayList
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 @Suppress("TooManyFunctions")
 class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispatchers.IO) {
@@ -75,9 +75,11 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
         songCache = Caffeine.newBuilder()
             .initialCapacity(128)
             .maximumSize(2048)
-            .build(AsyncLoader(this) {
-                lookupSong(it)
-            })
+            .build(
+                AsyncLoader(this) {
+                    lookupSong(it)
+                }
+            )
 
         searchCache = Caffeine.newBuilder()
             .initialCapacity(128)
@@ -101,10 +103,12 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
 
             try {
                 withContext(coroutineContext) {
-                    for (partition: List<IndexedValue<String>> in Lists.partition(
-                        toBeLookedUp,
-                        BATCH_LOOKUP_MAX
-                    )) {
+                    for (
+                        partition: List<IndexedValue<String>> in Lists.partition(
+                            toBeLookedUp,
+                            BATCH_LOOKUP_MAX
+                        )
+                    ) {
                         val idsString = partition.joinToString(",") { pair -> pair.value }
 
                         val videos: List<Video> = api.videos().list(VIDEO_RESULT_PARTS)

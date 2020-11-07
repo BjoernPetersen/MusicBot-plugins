@@ -15,14 +15,14 @@ import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.getOrFail
-import java.net.URL
-import java.time.Duration
-import java.time.Instant
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.net.URL
+import java.time.Duration
+import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 @OptIn(KtorExperimentalAPI::class)
 internal class KtorCallback(private val port: Int) {

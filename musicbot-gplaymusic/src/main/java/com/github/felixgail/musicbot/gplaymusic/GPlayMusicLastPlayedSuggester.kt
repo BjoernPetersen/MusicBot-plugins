@@ -3,9 +3,6 @@ package com.github.felixgail.musicbot.gplaymusic
 import com.github.felixgail.gplaymusic.model.Station
 import com.github.felixgail.gplaymusic.model.Track
 import com.github.felixgail.gplaymusic.model.snippets.StationSeed
-import java.io.IOException
-import java.util.LinkedList
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -24,10 +21,14 @@ import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.gplaymusic.GPlayMusicProvider
+import java.io.IOException
+import java.util.LinkedList
+import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
 @IdBase("Station based on last played song")
-class GPlayMusicLastPlayedSuggester : Suggester,
+class GPlayMusicLastPlayedSuggester :
+    Suggester,
     CoroutineScope by PluginScope(Dispatchers.IO) {
     private val logger = KotlinLogging.logger { }
 

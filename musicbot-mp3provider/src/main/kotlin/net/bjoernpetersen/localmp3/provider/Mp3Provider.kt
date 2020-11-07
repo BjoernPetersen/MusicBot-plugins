@@ -1,9 +1,9 @@
 package net.bjoernpetersen.localmp3.provider
 
-import java.nio.file.Path
 import net.bjoernpetersen.musicbot.api.player.Song
 import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.spi.plugin.Provider
+import java.nio.file.Path
 
 @IdBase("Local MP3s")
 interface Mp3Provider : Provider {

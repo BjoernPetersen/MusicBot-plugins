@@ -6,14 +6,6 @@ import com.github.felixgail.gplaymusic.model.enums.StreamQuality
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.LoadingCache
 import com.google.inject.Inject
-import java.io.File
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.concurrent.TimeUnit
-import kotlin.math.max
-import kotlin.math.min
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -43,6 +35,14 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.TokenRefreshException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.UnsupportedAudioFileException
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.gplaymusic.GPlayMusicProvider
 import net.bjoernpetersen.musicbot.spi.util.FileStorage
+import java.io.File
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.concurrent.TimeUnit
+import kotlin.math.max
+import kotlin.math.min
 
 class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope(Dispatchers.IO) {
 
@@ -119,9 +119,11 @@ class GPlayMusicProviderImpl : GPlayMusicProvider, CoroutineScope by PluginScope
             .expireAfterAccess(cacheTime.get()!!.toLong(), TimeUnit.MINUTES)
             .initialCapacity(CACHE_INITIAL_CAPACITY)
             .maximumSize(CACHE_MAX_SIZE)
-            .build(AsyncLoader(this) {
-                getSongFromTrack(api.trackApi.getTrack(it))
-            })
+            .build(
+                AsyncLoader(this) {
+                    getSongFromTrack(api.trackApi.getTrack(it))
+                }
+            )
 
         val songDir = fileDir
         if (!songDir.exists()) {

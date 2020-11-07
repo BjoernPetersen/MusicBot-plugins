@@ -3,7 +3,6 @@ package com.github.felixgail.musicbot.gplaymusic
 import com.github.felixgail.gplaymusic.api.GPlayMusic
 import com.github.felixgail.gplaymusic.api.StationApi
 import com.github.felixgail.gplaymusic.api.TrackApi
-import com.github.felixgail.gplaymusic.exceptions.InitializationException as GPlayMusicInitializationException
 import com.github.felixgail.gplaymusic.util.TokenProvider
 import com.google.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -18,6 +17,7 @@ import net.bjoernpetersen.musicbot.spi.plugin.GenericPlugin
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.gplaymusic.GPlayMusicAuthenticator
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeProvider
+import com.github.felixgail.gplaymusic.exceptions.InitializationException as GPlayMusicInitializationException
 
 @Base
 class GPlayMusicApi : GenericPlugin, CoroutineScope by PluginScope(Dispatchers.IO) {

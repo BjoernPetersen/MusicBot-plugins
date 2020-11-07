@@ -1,10 +1,5 @@
 package net.bjoernpetersen.localmp3.suggester
 
-import java.io.IOException
-import java.nio.file.Path
-import java.util.Collections
-import java.util.LinkedList
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import net.bjoernpetersen.localmp3.provider.Mp3Provider
@@ -27,6 +22,11 @@ import net.bjoernpetersen.musicbot.spi.plugin.BrokenSuggesterException
 import net.bjoernpetersen.musicbot.spi.plugin.NoSuchSongException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import java.io.IOException
+import java.nio.file.Path
+import java.util.Collections
+import java.util.LinkedList
+import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
 @IdBase("M3U Playlist")

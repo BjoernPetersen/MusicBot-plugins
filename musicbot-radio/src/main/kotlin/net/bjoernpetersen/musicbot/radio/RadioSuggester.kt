@@ -1,8 +1,5 @@
 package net.bjoernpetersen.musicbot.radio
 
-import java.nio.file.Files
-import java.util.Base64
-import javax.inject.Inject
 import net.bjoernpetersen.m3u.M3uParser
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
@@ -15,6 +12,9 @@ import net.bjoernpetersen.musicbot.api.plugin.IdBase
 import net.bjoernpetersen.musicbot.api.plugin.InitializationException
 import net.bjoernpetersen.musicbot.spi.plugin.Suggester
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
+import java.nio.file.Files
+import java.util.Base64
+import javax.inject.Inject
 
 @IdBase("Web radio")
 class RadioSuggester : Suggester {

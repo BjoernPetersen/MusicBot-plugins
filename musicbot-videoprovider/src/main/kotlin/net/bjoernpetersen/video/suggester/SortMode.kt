@@ -1,8 +1,8 @@
 package net.bjoernpetersen.video.suggester
 
-import java.util.Comparator
 import net.bjoernpetersen.musicbot.api.config.ConfigSerializer
 import net.bjoernpetersen.musicbot.api.config.DeserializationException
+import java.util.Comparator
 
 enum class SortMode(
     val friendlyName: String,

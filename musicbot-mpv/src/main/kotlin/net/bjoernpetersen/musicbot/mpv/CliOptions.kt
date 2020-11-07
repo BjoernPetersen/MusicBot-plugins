@@ -1,6 +1,5 @@
 package net.bjoernpetersen.musicbot.mpv
 
-import java.io.File
 import net.bjoernpetersen.musicbot.api.config.Config
 import net.bjoernpetersen.musicbot.api.config.FileChooser
 import net.bjoernpetersen.musicbot.api.config.FileSerializer
@@ -9,6 +8,7 @@ import net.bjoernpetersen.musicbot.api.config.NonnullConfigChecker
 import net.bjoernpetersen.musicbot.api.config.NumberBox
 import net.bjoernpetersen.musicbot.api.config.boolean
 import net.bjoernpetersen.musicbot.api.config.serialized
+import java.io.File
 
 internal class CliOptions(config: Config) {
     val allOptions: List<CliOption<*, *>>

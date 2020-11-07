@@ -1,9 +1,5 @@
 package net.bjoernpetersen.musicbot.radio
 
-import java.net.URL
-import java.nio.file.Files
-import java.nio.file.Path
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -26,6 +22,10 @@ import net.bjoernpetersen.musicbot.spi.plugin.Playback
 import net.bjoernpetersen.musicbot.spi.plugin.Provider
 import net.bjoernpetersen.musicbot.spi.plugin.management.InitStateWriter
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.Mp3StreamPlaybackFactory
+import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Path
+import javax.inject.Inject
 
 @IdBase("Web radio")
 class RadioProvider : Provider, CoroutineScope by PluginScope(Dispatchers.IO) {

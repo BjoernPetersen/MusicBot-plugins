@@ -6,7 +6,6 @@ import com.wrapper.spotify.exceptions.SpotifyWebApiException
 import com.wrapper.spotify.exceptions.detailed.BadGatewayException
 import com.wrapper.spotify.exceptions.detailed.NotFoundException
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext
-import java.time.Duration
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.withContext
@@ -16,6 +15,7 @@ import mu.KotlinLogging
 import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
 import net.bjoernpetersen.musicbot.spi.plugin.PlaybackState
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenticator
+import java.time.Duration
 
 internal class SpotifyPlayback(
     private val authenticator: SpotifyAuthenticator,
@@ -69,9 +69,11 @@ internal class SpotifyPlayback(
                     .apply {
                         if (!isStarted) {
                             logger.debug { "Starting song" }
-                            uris(JsonArray().apply {
-                                add(songUri)
-                            })
+                            uris(
+                                JsonArray().apply {
+                                    add(songUri)
+                                }
+                            )
                             launchStateChecker()
                         }
                     }
