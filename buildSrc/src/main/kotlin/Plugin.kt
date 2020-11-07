@@ -5,6 +5,6 @@ object Plugin {
 
     const val VERSIONS = "0.34.0"
 
-    const val KOTLIN = "1.4.10"
+    const val KOTLIN = "1.3.70"
     const val SHADOW_JAR = "6.1.0"
 }
