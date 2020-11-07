@@ -14,6 +14,7 @@ tasks {
     }
     create<ConfigureShadowRelocation>("relocateDependencies") {
         target = shadowJar
+        prefix = "radio"
     }
 }
 
