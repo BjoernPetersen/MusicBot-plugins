@@ -5,8 +5,9 @@ import io.ktor.application.install
 import io.ktor.features.BadRequestException
 import io.ktor.features.MissingRequestParameterException
 import io.ktor.features.StatusPages
-import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
 import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.get
@@ -19,14 +20,18 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.net.URL
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @OptIn(KtorExperimentalAPI::class)
 internal class KtorCallback(private val port: Int) {
 
-    val callbackUrl = URL("http", LOCALHOST, port, CALLBACK_PATH)
+    val callbackUrl = URLBuilder().apply {
+        protocol = URLProtocol.HTTP
+        host = LOCALHOST
+        port = this@KtorCallback.port
+        path(CALLBACK_PATH)
+    }.build()
 
     suspend fun start(state: String): Map<String, String> {
         val result = CompletableDeferred<Map<String, String>>()
@@ -44,12 +49,6 @@ internal class KtorCallback(private val port: Int) {
                 }
 
                 get(CALLBACK_PATH) {
-                    call.respondText(
-                        redirectPageContent,
-                        ContentType.Text.Html
-                    )
-                }
-                get(REDIRECTED_PATH) {
                     val params = call.request.queryParameters
 
                     if (params[STATE_KEY] != state)
@@ -87,25 +86,12 @@ internal class KtorCallback(private val port: Int) {
 
     companion object {
         const val STATE_KEY = "state"
-        const val ACCESS_TOKEN_KEY = "access_token"
-        const val EXPIRATION_KEY = "expires_in"
 
-        private const val CALLBACK_PATH = "/redirect"
-        const val REDIRECTED_PATH = "/callback"
+        private const val CALLBACK_PATH = "redirect"
         const val LOCALHOST = "localhost"
 
         const val SHUTDOWN_GRACE_MILLIS: Long = 50
         const val SHUTDOWN_TIMEOUT_MILLIS: Long = 200
-
-        private const val REDIRECT_PAGE_FILE = "RedirectPage.html"
-        private val redirectPageContent = loadHtml(REDIRECT_PAGE_FILE)
-
-        private fun loadHtml(fileName: String): String {
-            return this::class.java
-                .getResourceAsStream(fileName)
-                .bufferedReader()
-                .readText()
-        }
     }
 }
 

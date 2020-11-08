@@ -40,7 +40,8 @@ internal class CharacterSet private constructor(
     }
 
     /**
-     * Creates a new character set allowing all characters that are either in this or the other set.
+     * Creates a new character set allowing all characters that are in this or
+     * the other set (or both).
      */
     operator fun plus(other: CharacterSet): CharacterSet {
         if (this == other) return this
