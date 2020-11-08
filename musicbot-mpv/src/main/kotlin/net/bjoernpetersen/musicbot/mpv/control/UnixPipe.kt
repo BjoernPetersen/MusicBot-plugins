@@ -20,7 +20,7 @@ class UnixPipe(
     private val outputWriter = socket.outputStream.bufferedWriter()
 
     override fun readLine(): String? {
-        if(!inputReader.ready()) {
+        if (!inputReader.ready()) {
             return null
         }
         return inputReader.readLine() ?: throw EOFException()

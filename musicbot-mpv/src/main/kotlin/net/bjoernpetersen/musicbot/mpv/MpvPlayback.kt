@@ -144,4 +144,3 @@ internal class MpvPlayback(
         }
     }
 }
-

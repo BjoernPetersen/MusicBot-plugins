@@ -1,4 +1,4 @@
-package net.bjoernpetersen.musicbot.mpv.control;
+package net.bjoernpetersen.musicbot.mpv.control
 
 object MpvBoolean {
     const val TRUE = "yes"

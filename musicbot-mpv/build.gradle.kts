@@ -33,9 +33,9 @@ dependencies {
     )
 
     implementation(
-        group="com.kohlschutter.junixsocket",
-        name="junixsocket-core",
-        version=Lib.JUNIXSOCKET
+        group = "com.kohlschutter.junixsocket",
+        name = "junixsocket-core",
+        version = Lib.JUNIXSOCKET
     )
 
     testImplementation(

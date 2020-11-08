@@ -62,7 +62,8 @@ private class RandomAccessReader(
         }
         val read = readBytes()
         if (read == 0) return null
-        while (decodeBytes(read == -1));
+        while (decodeBytes(read == -1)) {
+        }
         val line = lineQueue.poll()
         if (line == null && read == -1) {
             throw EOFException()
