@@ -29,4 +29,3 @@ bin/
 !gradle-wrapper.jar
 build/
 out/
-gradle.properties
