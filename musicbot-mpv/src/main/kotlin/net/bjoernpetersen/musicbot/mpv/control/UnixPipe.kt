@@ -13,8 +13,11 @@ class UnixPipe(
     private val lock = ReentrantLock()
     private val socketAddress = AFUNIXSocketAddress(path.toFile())
     private val socket = AFUNIXSocket.newInstance().also {
-        it.keepAlive = true
+        println(path)
         it.connect(socketAddress)
+        println("Connected")
+        it.keepAlive = true
+        println("Keeping alive")
     }
     private val inputReader = socket.inputStream.bufferedReader()
     private val outputWriter = socket.outputStream.bufferedWriter()
