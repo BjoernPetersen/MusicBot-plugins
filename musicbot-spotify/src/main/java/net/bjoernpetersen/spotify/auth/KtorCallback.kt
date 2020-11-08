@@ -12,8 +12,8 @@ import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.routing
-import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.toMap
 import kotlinx.coroutines.CompletableDeferred
@@ -35,7 +35,7 @@ internal class KtorCallback(private val port: Int) {
 
     suspend fun start(state: String): Map<String, String> {
         val result = CompletableDeferred<Map<String, String>>()
-        val server = embeddedServer(CIO, port = port, host = LOCALHOST) {
+        val server = embeddedServer(Netty, port = port, host = LOCALHOST) {
             routing {
                 install(StatusPages) {
                     exception<AuthenticationException> {
@@ -79,7 +79,7 @@ internal class KtorCallback(private val port: Int) {
                 result.await()
             } finally {
                 cancelJob.cancel()
-                server.stop(SHUTDOWN_GRACE_MILLIS, SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+                server.stop(SHUTDOWN_GRACE_MILLIS, SHUTDOWN_TIMEOUT_MILLIS)
             }
         }
     }

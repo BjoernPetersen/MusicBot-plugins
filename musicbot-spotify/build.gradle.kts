@@ -35,45 +35,6 @@ dependencies {
         exclude("com.google.guava")
         exclude("com.google.inject")
     }
-    implementation(
-        group = "io.ktor",
-        name = "ktor-client-cio",
-        version = Lib.KTOR
-    ) {
-        exclude("org.slf4j")
-        exclude("org.jetbrains")
-        exclude("org.jetbrains.kotlin")
-        exclude("com.google.guava")
-        exclude("com.google.inject")
-        exclude("org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
-    }
-
-    // Ktor for OAuth callback
-    implementation(
-        group = "io.ktor",
-        name = "ktor-server-cio",
-        version = Lib.KTOR
-    ) {
-        exclude("org.slf4j")
-        exclude("org.jetbrains")
-        exclude("org.jetbrains.kotlin")
-        exclude("com.google.guava")
-        exclude("com.google.inject")
-        exclude("org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
-    }
-
-    implementation(
-        group = "io.ktor",
-        name = "ktor-client-cio",
-        version = Lib.KTOR
-    ) {
-        exclude("org.slf4j")
-        exclude("org.jetbrains")
-        exclude("org.jetbrains.kotlin")
-        exclude("com.google.guava")
-        exclude("com.google.inject")
-        exclude("org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
-    }
 
     testImplementation(
         group = "com.github.bjoernpetersen",

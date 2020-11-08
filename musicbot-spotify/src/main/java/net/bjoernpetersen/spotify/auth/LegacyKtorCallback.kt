@@ -11,8 +11,8 @@ import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.get
 import io.ktor.routing.routing
-import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.getOrFail
 import kotlinx.coroutines.CompletableDeferred
@@ -22,7 +22,6 @@ import kotlinx.coroutines.launch
 import java.net.URL
 import java.time.Duration
 import java.time.Instant
-import java.util.concurrent.TimeUnit
 
 @Deprecated("Shouldn't be used anymore")
 @OptIn(KtorExperimentalAPI::class)
@@ -32,7 +31,7 @@ internal class LegacyKtorCallback(private val port: Int) {
 
     suspend fun start(state: String): Token {
         val result = CompletableDeferred<Token>()
-        val server = embeddedServer(CIO, port = port, host = LOCALHOST) {
+        val server = embeddedServer(Netty, port = port, host = LOCALHOST) {
             routing {
                 install(StatusPages) {
                     exception<LegacyAuthenticationException> {
@@ -83,7 +82,7 @@ internal class LegacyKtorCallback(private val port: Int) {
                 result.await()
             } finally {
                 cancelJob.cancel()
-                server.stop(SHUTDOWN_GRACE_MILLIS, SHUTDOWN_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
+                server.stop(SHUTDOWN_GRACE_MILLIS, SHUTDOWN_TIMEOUT_MILLIS)
             }
         }
     }

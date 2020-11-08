@@ -1,10 +1,9 @@
 package net.bjoernpetersen.spotify.auth
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.call
-import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.request.request
+import io.ktor.client.statement.HttpResponse
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.url
 import kotlinx.coroutines.async
@@ -48,8 +47,8 @@ class LegacyKtorCallbackTest {
             queryParams.add(LegacyKtorCallback.EXPIRATION_KEY to expirationTime.toString())
         }
 
-        return HttpClient(CIO).use { client ->
-            client.call(
+        return HttpClient().use { client ->
+            client.request(
                 urlString = url {
                     this.port = port
                     path(LegacyKtorCallback.REDIRECTED_PATH)
@@ -58,7 +57,7 @@ class LegacyKtorCallbackTest {
                 queryParams.forEach { (key, value) ->
                     parameter(key, value)
                 }
-            }.response
+            }
         }
     }
 

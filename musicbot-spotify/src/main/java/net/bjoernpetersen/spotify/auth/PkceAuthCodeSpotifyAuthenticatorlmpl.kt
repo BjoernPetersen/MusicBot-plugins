@@ -1,12 +1,13 @@
 package net.bjoernpetersen.spotify.auth
 
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.features.ClientRequestException
+import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.forms.submitForm
-import io.ktor.client.response.HttpResponse
 import io.ktor.http.Parameters
 import io.ktor.http.Url
 import io.ktor.http.toURI
+import io.ktor.utils.io.readUTF8Line
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -30,6 +31,7 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyAuthenti
 import net.bjoernpetersen.musicbot.spi.plugin.predefined.spotify.SpotifyScope
 import net.bjoernpetersen.musicbot.spi.util.BrowserOpener
 import java.security.MessageDigest
+import java.time.Instant
 import java.util.Base64
 import javax.inject.Inject
 
@@ -47,7 +49,14 @@ class PkceAuthCodeSpotifyAuthenticatorImpl :
 
     private val scopes: MutableSet<SpotifyScope> = HashSet(SpotifyScope.values().size * 2)
 
-    private lateinit var authHandler: AuthHandler
+    private val authHandler: AuthHandler by lazy {
+        AuthHandler(
+            browserOpener,
+            secret.refreshToken,
+            scopes.toList(),
+            config.port
+        )
+    }
 
     override fun requireScopes(vararg scopes: SpotifyScope) {
         this.scopes.addAll(scopes)
@@ -58,12 +67,7 @@ class PkceAuthCodeSpotifyAuthenticatorImpl :
     override fun invalidateToken() = authHandler.invalidateToken()
 
     override suspend fun initialize(progressFeedback: ProgressFeedback) {
-        authHandler = AuthHandler(
-            browserOpener,
-            secret.refreshToken,
-            scopes.toList(),
-            config.port.get()!!
-        )
+
         progressFeedback.state("Trying to retrieve a token...")
         withContext(Dispatchers.IO) {
             try {
@@ -135,12 +139,12 @@ private class ProofKey {
     val challenge: String = createChallenge(verifier)
 
     private companion object {
-        val AllowedChars = CharacterSet.Alphanumeric + CharacterSet.of("~_-.")
+        val AllowedChars = CharacterSet.Alphanumeric //+ CharacterSet.of("~_-.")
 
         fun createChallenge(verifier: String): String {
             val sha = MessageDigest.getInstance("SHA-256")
             val digest = sha.digest(verifier.toByteArray())
-            val base64 = Base64.getUrlEncoder()
+            val base64 = Base64.getUrlEncoder().withoutPadding()
             val encodedDigest = base64.encode(digest)
             return encodedDigest.toString(Charsets.US_ASCII)
         }
@@ -151,7 +155,7 @@ private class AuthHandler(
     private val browserOpener: BrowserOpener,
     private val refreshTokenEntry: Config.StringEntry,
     private val scopes: List<SpotifyScope>,
-    private val port: Int
+    private val port: Config.SerializedEntry<Int>
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -172,6 +176,7 @@ private class AuthHandler(
         refreshLock.withLock {
             val accessToken = accessToken
             if (accessToken == null || accessToken.isExpired(60)) {
+                logger.info { "Retrieving new access token" }
                 return obtainAccessToken()
             }
             return accessToken.value
@@ -180,74 +185,102 @@ private class AuthHandler(
 
     suspend fun obtainAccessToken(): String {
         val refreshToken = refreshTokenEntry.get()
-        return if (refreshToken == null) {
+        val accessToken = if (refreshToken == null) {
             doInteractiveAuth()
         } else {
             refresh(refreshToken)
         }
+        this.accessToken = accessToken
+        return accessToken.value
     }
 
-    suspend fun refresh(refreshToken: String): String {
-        TODO("Retrieve new tokens")
+    suspend fun refresh(refreshToken: String): Token {
+        val response = withContext(Dispatchers.IO) {
+            HttpClient { install(JsonFeature) }.use { client ->
+                client.submitForm<RefreshResponse>(
+                    url = "https://accounts.spotify.com/api/token",
+                    formParameters = Parameters.build {
+                        append("client_id", CLIENT_ID)
+                        append("grant_type", "refresh_token")
+                        append("refresh_token", refreshToken)
+                    }
+                )
+            }
+        }
+        return processRefreshResponse(response)
     }
 
-    suspend fun doInteractiveAuth(): String {
-        val proofKey = ProofKey()
-        val state = RandomString.generate()
-        val callback = KtorCallback(port)
-        val callbackJob = withContext(Dispatchers.IO) {
-            async(Dispatchers.IO) { callback.start(state) }
-        }
-        val url = buildSpotifyPkceUrl(
-            callback.callbackUrl,
-            codeChallenge = proofKey.challenge,
-            state = state,
-            scopes = scopes
-        )
+    suspend fun doInteractiveAuth(): Token {
+        return withContext(Dispatchers.IO) {
+            val proofKey = ProofKey()
+            val state = RandomString.generate()
+            val callback = KtorCallback(port.get()!!)
+            logger.info { "Starting callback server" }
+            val callbackJob = async { callback.start(state) }
+            val redirectUrl = callback.callbackUrl
+            val url = buildSpotifyPkceUrl(
+                redirectUrl,
+                codeChallenge = proofKey.challenge,
+                state = state,
+                scopes = scopes
+            )
 
-        val params = try {
-            browserOpener.openDocument(url.toURI().toURL())
-            callbackJob.await()
-        } catch (e: TimeoutTokenException) {
-            logger.error { "No token received within one minute" }
-            throw TokenRefreshException(e)
-        } catch (e: InvalidTokenException) {
-            logger.error(e) { "Invalid token response received" }
-            throw TokenRefreshException(e)
-        }
+            val params = try {
+                logger.info { "Opening browser" }
+                browserOpener.openDocument(url.toURI().toURL())
+                callbackJob.await()
+            } catch (e: TimeoutTokenException) {
+                logger.error { "No token received within one minute" }
+                throw TokenRefreshException(e)
+            } catch (e: InvalidTokenException) {
+                logger.error(e) { "Invalid token response received" }
+                throw TokenRefreshException(e)
+            }
 
-        val error = params["error"]
-        if (error != null) throw TokenRefreshException(error)
-        val code = params["code"] ?: throw TokenRefreshException("No code sent")
-        return retrieveTokenPair(
-            code = code,
-            redirectUrl = url,
-            verifier = proofKey.verifier
-        )
+            val error = params["error"]
+            if (error != null) throw TokenRefreshException(error)
+            val code = params["code"] ?: throw TokenRefreshException("No code sent")
+            retrieveTokenPair(
+                code = code,
+                redirectUrl = redirectUrl,
+                verifier = proofKey.verifier
+            )
+        }
     }
 
     private suspend fun retrieveTokenPair(
         code: String,
         redirectUrl: Url,
         verifier: String
-    ): String {
-        val client = HttpClient(CIO) {
-            //TODO:    install(JsonFeature)
-        }
-        val result: HttpResponse = client.use { client ->
-            client.submitForm(
-                url = "https://accounts.spotify.com/api/token",
-                formParameters = Parameters.build {
-                    append("client_id", CLIENT_ID)
-                    append("grant_type", "authorization_code")
-                    append("code", code)
-                    append("redirect_uri", redirectUrl.toString())
-                    append("code_verifier", verifier)
-                }
-            )
+    ): Token {
+        val response: RefreshResponse = try {
+            HttpClient { install(JsonFeature) }.use { client ->
+                client.submitForm(
+                    url = "https://accounts.spotify.com/api/token",
+                    formParameters = Parameters.build {
+                        append("client_id", CLIENT_ID)
+                        append("grant_type", "authorization_code")
+                        append("code", code)
+                        append("redirect_uri", redirectUrl.toString())
+                        append("code_verifier", verifier)
+                    }
+                )
+            }
+        } catch (e: ClientRequestException) {
+            val body = e.response.content.readUTF8Line()
+            logger.error(e) { body }
+            throw TokenRefreshException(e)
         }
 
-        TODO("parse response, update refresh token, return access token")
+        return processRefreshResponse(response)
+    }
+
+    private fun processRefreshResponse(response: RefreshResponse): Token {
+        val refreshToken = response.refresh_token
+        refreshTokenEntry.set(refreshToken)
+
+        val expiration = Instant.now().plusSeconds(response.expires_in.toLong())
+        return Token(response.access_token, expiration)
     }
 
     /**
@@ -258,3 +291,11 @@ private class AuthHandler(
         accessToken = null
     }
 }
+
+private data class RefreshResponse(
+    val access_token: String,
+    val token_type: String,
+    val scope: String,
+    val expires_in: Int,
+    val refresh_token: String
+)
