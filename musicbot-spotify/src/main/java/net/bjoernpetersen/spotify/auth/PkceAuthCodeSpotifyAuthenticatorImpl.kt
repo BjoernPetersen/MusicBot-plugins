@@ -135,10 +135,11 @@ private class PkceSecrets(secrets: Config) {
 }
 
 private class ProofKey {
-    val verifier: String = RandomString.generate(128, AllowedChars)
+    val verifier: String = RandomString.generate(MAX_VERIFIER_LENGTH, AllowedChars)
     val challenge: String = createChallenge(verifier)
 
     private companion object {
+        const val MAX_VERIFIER_LENGTH = 128
         val AllowedChars = CharacterSet.Alphanumeric // + CharacterSet.of("~_-.")
 
         fun createChallenge(verifier: String): String {
@@ -175,7 +176,7 @@ private class AuthHandler(
     suspend fun getToken(): String {
         refreshLock.withLock {
             val accessToken = accessToken
-            if (accessToken == null || accessToken.isExpired(60)) {
+            if (accessToken == null || accessToken.isExpired()) {
                 logger.info { "Retrieving new access token" }
                 return obtainAccessToken()
             }
@@ -210,6 +211,7 @@ private class AuthHandler(
         return processRefreshResponse(response)
     }
 
+    @Suppress("ThrowsCount")
     suspend fun doInteractiveAuth(): Token {
         return withContext(Dispatchers.IO) {
             val proofKey = ProofKey()
@@ -292,6 +294,7 @@ private class AuthHandler(
     }
 }
 
+@Suppress("ConstructorParameterNaming")
 private data class RefreshResponse(
     val access_token: String,
     val token_type: String,
