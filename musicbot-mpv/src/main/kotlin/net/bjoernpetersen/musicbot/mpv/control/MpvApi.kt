@@ -11,6 +11,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import mu.KotlinLogging
+import java.io.EOFException
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -21,6 +23,8 @@ typealias PropertyListener = (Any) -> Unit
 class MpvApi(
     private val pipe: Pipe
 ) : CoroutineScope by CoroutineScope(Dispatchers.IO), AutoCloseable {
+    private val logger = KotlinLogging.logger { }
+
     private val moshi = Moshi.Builder().build()
     private val requests = HashMap<Int, CompletableDeferred<Any?>>()
     private val eventListeners = HashMap<String, EventListener>()
@@ -79,9 +83,10 @@ class MpvApi(
                         if (listener != null) listener(event)
                     }
                 }
+            } catch (e: EOFException) {
+                logger.debug(e) { "Reached end of file" }
             } catch (e: IOException) {
-                // TODO log
-                e.printStackTrace()
+                logger.warn(e) {}
             }
         }
     }

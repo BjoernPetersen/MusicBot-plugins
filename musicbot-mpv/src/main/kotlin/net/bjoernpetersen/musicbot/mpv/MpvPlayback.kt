@@ -95,9 +95,7 @@ internal class MpvPlayback(
 
     override suspend fun pause() {
         withContext(coroutineContext) {
-            println("Pause")
             getApi().setProperty(MpvProperty.PAUSE, MpvBoolean.TRUE)
-            println("Paused")
         }
     }
 
