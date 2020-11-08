@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import me.xdrop.fuzzywuzzy.FuzzySearch
+import mu.KotlinLogging
 import net.bjoernpetersen.m3u.M3uParser
 import net.bjoernpetersen.m3u.model.M3uEntry
 import net.bjoernpetersen.musicbot.api.config.Config
@@ -29,6 +30,8 @@ import javax.inject.Inject
 
 @IdBase("Web radio")
 class RadioProvider : Provider, CoroutineScope by PluginScope(Dispatchers.IO) {
+    private val logger = KotlinLogging.logger { }
+
     override val name: String = "Web radio"
     override val description: String = "Plays a web radio station"
 
@@ -40,6 +43,7 @@ class RadioProvider : Provider, CoroutineScope by PluginScope(Dispatchers.IO) {
 
     private lateinit var entries: List<M3uEntry>
     private lateinit var songs: List<Song>
+
     @Inject
     private lateinit var playbackFactory: Mp3StreamPlaybackFactory
 
@@ -64,7 +68,7 @@ class RadioProvider : Provider, CoroutineScope by PluginScope(Dispatchers.IO) {
 
     override suspend fun loadSong(song: Song): Resource {
         val entry = song.id.toIntOrNull()?.let { entries.getOrNull(it) }
-            ?: throw SongLoadingException()
+            ?: throw SongLoadingException("Could not load song with ID: $song.id")
         return UrlResource(entry.location.url)
     }
 
@@ -83,9 +87,9 @@ class RadioProvider : Provider, CoroutineScope by PluginScope(Dispatchers.IO) {
     override suspend fun initialize(progressFeedback: ProgressFeedback) {
         withContext(coroutineContext) {
             progressFeedback.state("Parsing playlist file")
-            entries = M3uParser.parse(playlistFile.get()!!).filter { it.title != null }
+            entries = M3uParser.parse(playlistFile.get()!!)
             songs = entries.mapIndexed { index, entry ->
-                createSong(index.toString(), entry.title!!)
+                createSong(index.toString(), entry.title ?: "Untitled radio stream")
             }
         }
     }
