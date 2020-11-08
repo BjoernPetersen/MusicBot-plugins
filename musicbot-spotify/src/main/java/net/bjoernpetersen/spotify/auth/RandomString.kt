@@ -14,8 +14,3 @@ internal object RandomString {
         return builder.toString()
     }
 }
-
-@Deprecated("Use RandomString.generate()", ReplaceWith("RandomString.generate()"))
-fun generateRandomString(): String {
-    return RandomString.generate()
-}

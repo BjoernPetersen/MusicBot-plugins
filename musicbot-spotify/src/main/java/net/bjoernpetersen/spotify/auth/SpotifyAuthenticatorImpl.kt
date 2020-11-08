@@ -121,7 +121,7 @@ class SpotifyAuthenticatorImpl :
         return withContext(coroutineContext) {
             if (currentToken !== prevToken) currentToken!!
             else try {
-                val state = generateRandomString()
+                val state = RandomString.generate()
                 val callback = LegacyKtorCallback(port.get()!!)
                 val callbackJob = async(Dispatchers.IO) { callback.start(state) }
                 val url = getSpotifyUrl(state, callback.callbackUrl)
