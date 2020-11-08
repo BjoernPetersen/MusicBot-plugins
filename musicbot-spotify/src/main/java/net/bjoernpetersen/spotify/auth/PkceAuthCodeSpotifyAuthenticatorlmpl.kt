@@ -139,7 +139,7 @@ private class ProofKey {
     val challenge: String = createChallenge(verifier)
 
     private companion object {
-        val AllowedChars = CharacterSet.Alphanumeric //+ CharacterSet.of("~_-.")
+        val AllowedChars = CharacterSet.Alphanumeric // + CharacterSet.of("~_-.")
 
         fun createChallenge(verifier: String): String {
             val sha = MessageDigest.getInstance("SHA-256")

@@ -21,7 +21,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.Duration
-import java.util.concurrent.TimeUnit
 
 @OptIn(KtorExperimentalAPI::class)
 internal class KtorCallback(private val port: Int) {
