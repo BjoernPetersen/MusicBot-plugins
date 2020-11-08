@@ -1,10 +1,9 @@
 package net.bjoernpetersen.spotify.auth
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.call
-import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.parameter
-import io.ktor.client.response.HttpResponse
+import io.ktor.client.request.request
+import io.ktor.client.statement.HttpResponse
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.url
 import kotlinx.coroutines.async
@@ -29,7 +28,7 @@ import java.util.function.Supplier
 @ExtendWith(PortExtension::class)
 @Execution(ExecutionMode.CONCURRENT)
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
-class KtorCallbackTest {
+class LegacyKtorCallbackTest {
 
     private suspend fun send(
         port: Int,
@@ -39,26 +38,26 @@ class KtorCallbackTest {
     ): HttpResponse {
         val queryParams: MutableList<Pair<String, String>> = LinkedList()
         if (state != null) {
-            queryParams.add(KtorCallback.STATE_KEY to state)
+            queryParams.add(LegacyKtorCallback.STATE_KEY to state)
         }
         if (token != null) {
-            queryParams.add(KtorCallback.ACCESS_TOKEN_KEY to token)
+            queryParams.add(LegacyKtorCallback.ACCESS_TOKEN_KEY to token)
         }
         if (expirationTime != null) {
-            queryParams.add(KtorCallback.EXPIRATION_KEY to expirationTime.toString())
+            queryParams.add(LegacyKtorCallback.EXPIRATION_KEY to expirationTime.toString())
         }
 
-        return HttpClient(CIO).use { client ->
-            client.call(
+        return HttpClient().use { client ->
+            client.request(
                 urlString = url {
                     this.port = port
-                    path(KtorCallback.REDIRECTED_PATH)
+                    path(LegacyKtorCallback.REDIRECTED_PATH)
                 }
             ) {
                 queryParams.forEach { (key, value) ->
                     parameter(key, value)
                 }
-            }.response
+            }
         }
     }
 
@@ -71,7 +70,7 @@ class KtorCallbackTest {
         expirationTime: Int? = null
     ) {
         runBlocking {
-            val tokenResult = async { KtorCallback(port).start(CORRECT_STATE) }
+            val tokenResult = async { LegacyKtorCallback(port).start(CORRECT_STATE) }
 
             val response = send(port, state, token, expirationTime)
             assertEquals(code, response.status.value)
@@ -102,7 +101,7 @@ class KtorCallbackTest {
             .map { (token, expirationTime, state) ->
                 dynamicTest("token: $token, expirationTime: $expirationTime, state: $state") {
                     assertTimeoutPreemptively(Duration.ofSeconds(80)) {
-                        assertThrows<TimeoutTokenException> {
+                        assertThrows<LegacyTimeoutTokenException> {
                             test(
                                 portSupplier.get(),
                                 false, 401, state, token, expirationTime
@@ -115,7 +114,7 @@ class KtorCallbackTest {
 
     @Test
     fun noToken(port: Int) {
-        assertThrows<InvalidTokenException> {
+        assertThrows<LegacyInvalidTokenException> {
             test(port, true, 400, CORRECT_STATE)
         }
     }
