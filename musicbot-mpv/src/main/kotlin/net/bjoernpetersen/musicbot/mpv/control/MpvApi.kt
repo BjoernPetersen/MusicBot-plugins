@@ -30,6 +30,7 @@ class MpvApi(
         launch { listen() }
     }
 
+    @Suppress("LoopWithTooManyJumpStatements", "ComplexMethod", "NestedBlockDepth")
     private suspend fun listen() {
         val commandResponseAdapter =
             CommandResponseJsonAdapter(
@@ -42,7 +43,7 @@ class MpvApi(
             try {
                 val line = pipe.readLine()
                 if (line == null) {
-                    delay(500)
+                    delay(WAIT_ON_NULL_LINE_MILLIS)
                     continue
                 }
                 try {
@@ -148,6 +149,7 @@ class MpvApi(
     }
 
     private companion object {
+        const val WAIT_ON_NULL_LINE_MILLIS = 500L
         private val requestId = AtomicInteger()
         fun createRequestId(): Int {
             return requestId.getAndIncrement()

@@ -83,7 +83,7 @@ internal class MpvPlayback(
     }
 
     private suspend fun getApi(): MpvApi {
-        while (api == null) delay(200)
+        while (api == null) delay(API_ONLINE_WAIT_MILLIS)
         return api!!
     }
 
@@ -126,6 +126,7 @@ internal class MpvPlayback(
     }
 
     private companion object {
+        const val API_ONLINE_WAIT_MILLIS: Long = 200
         const val LOAD_TIME_MILLIS: Long = 2000
         const val EXIT_TIMEOUT_MILLIS: Long = 5000
         val isWin = System.getProperty("os.name").toLowerCase().startsWith("win")

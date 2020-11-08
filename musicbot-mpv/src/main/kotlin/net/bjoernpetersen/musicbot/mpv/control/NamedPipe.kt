@@ -47,15 +47,15 @@ class NamedPipe(path: Path) : Pipe {
 private class RandomAccessReader(
     private val file: RandomAccessFile
 ) {
-    private val bytes = ByteBuffer.allocate(2048)
-    private val chars = CharBuffer.allocate(8192)
+    private val bytes = ByteBuffer.allocate(BYTE_BUFFER_SIZE)
+    private val chars = CharBuffer.allocate(CHAR_BUFFER_SIZE)
     private val lineBuilder = StringBuilder()
     private val lineQueue: Queue<String> = LinkedList()
     private val decoder = Charsets.UTF_8.newDecoder().apply {
         this.onUnmappableCharacter(CodingErrorAction.REPORT)
     }
 
-    @Suppress("ControlFlowWithEmptyBody")
+    @Suppress("ControlFlowWithEmptyBody", "ReturnCount")
     fun readLine(): String? {
         if (!lineQueue.isEmpty()) {
             return lineQueue.poll()
@@ -63,6 +63,7 @@ private class RandomAccessReader(
         val read = readBytes()
         if (read == 0) return null
         while (decodeBytes(read == -1)) {
+            // Decode until nothing is read anymore
         }
         val line = lineQueue.poll()
         if (line == null && read == -1) {
@@ -108,6 +109,11 @@ private class RandomAccessReader(
             }
         }
         chars.clear()
+    }
+
+    private companion object {
+        const val BYTE_BUFFER_SIZE = 2048
+        const val CHAR_BUFFER_SIZE = 4 * BYTE_BUFFER_SIZE
     }
 }
 
