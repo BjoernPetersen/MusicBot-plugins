@@ -134,7 +134,7 @@ internal class MpvPlayback(
             return if (isWin) {
                 Paths.get("""\\.\pipe\$uuid""")
             } else {
-                baseDir.resolve(uuid)
+                Paths.get("/tmp").resolve(uuid)
             }
         }
 
