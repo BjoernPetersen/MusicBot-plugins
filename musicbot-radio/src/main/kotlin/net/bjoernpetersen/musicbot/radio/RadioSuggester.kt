@@ -51,7 +51,7 @@ class RadioSuggester : Suggester {
                     if (playlistFile != null && Files.isRegularFile(playlistFile)) {
                         M3uParser.parse(playlistFile)
                             .mapIndexed { index, entry ->
-                                provider.createSong(index.toString(), entry.title!!)
+                                provider.createSong(index.toString(), entry.title ?: entry.location.toString())
                             }
                             .sortedBy { it.title }
                     } else emptyList()
