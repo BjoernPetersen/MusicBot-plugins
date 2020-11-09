@@ -1,13 +1,15 @@
 package net.bjoernpetersen.spotify.auth
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.URLProtocol
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.url
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTimeoutPreemptively
@@ -29,6 +31,7 @@ import java.util.function.Supplier
 @Execution(ExecutionMode.CONCURRENT)
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 class LegacyKtorCallbackTest {
+    private val logger = KotlinLogging.logger { }
 
     private suspend fun send(
         port: Int,
@@ -48,8 +51,10 @@ class LegacyKtorCallbackTest {
         }
 
         return HttpClient().use { client ->
-            client.request(
+            client.get(
                 urlString = url {
+                    protocol = URLProtocol.HTTP
+                    host = "localhost"
                     this.port = port
                     path(LegacyKtorCallback.REDIRECTED_PATH)
                 }
