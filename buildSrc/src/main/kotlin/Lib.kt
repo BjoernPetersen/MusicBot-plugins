@@ -6,7 +6,7 @@ object Lib {
     const val SLF4J = "1.8.0-beta4"
     const val JUNIT = "5.7.0"
 
-    const val KTOR = "1.2.5"
+    const val KTOR = "1.4.1"
 
     // GPlayMusic
     const val GPLAYMUSIC = "0.3.8"

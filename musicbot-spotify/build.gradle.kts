@@ -41,6 +41,12 @@ dependencies {
         name = "musicbot",
         version = Lib.MUSICBOT
     )
+    testRuntimeOnly(
+        group="io.ktor",
+        name="ktor-client-okhttp",
+        version=Lib.KTOR
+    )
+
     testImplementation(
         group = "org.junit.jupiter",
         name = "junit-jupiter-api",
