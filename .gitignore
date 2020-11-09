@@ -24,6 +24,7 @@ bin/
 
 # Mac #
 .DS_Store
+.java-version
 
 # Gradle #
 !gradle-wrapper.jar
