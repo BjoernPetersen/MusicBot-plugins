@@ -42,9 +42,9 @@ dependencies {
         version = Lib.MUSICBOT
     )
     testRuntimeOnly(
-        group="io.ktor",
-        name="ktor-client-okhttp",
-        version=Lib.KTOR
+        group = "io.ktor",
+        name = "ktor-client-okhttp",
+        version = Lib.KTOR
     )
 
     testImplementation(
