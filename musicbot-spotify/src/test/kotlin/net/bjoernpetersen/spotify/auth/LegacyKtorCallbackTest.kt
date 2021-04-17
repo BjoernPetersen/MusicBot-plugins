@@ -13,6 +13,7 @@ import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTimeoutPreemptively
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
@@ -26,6 +27,7 @@ import java.time.Duration
 import java.util.LinkedList
 import java.util.function.Supplier
 
+@Disabled
 @KtorExperimentalAPI
 @ExtendWith(PortExtension::class)
 @Execution(ExecutionMode.CONCURRENT)
