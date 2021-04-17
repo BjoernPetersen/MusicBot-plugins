@@ -2,9 +2,9 @@ import com.diffplug.spotless.LineEnding
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.10"
-    id("com.github.ben-manes.versions") version "0.34.0"
-    id("com.diffplug.spotless") version "5.7.0"
+    kotlin("jvm") version "1.4.32"
+    id("com.github.ben-manes.versions") version "0.38.0"
+    id("com.diffplug.spotless") version "5.12.1"
     id("io.gitlab.arturbosch.detekt") version "1.14.2"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     idea
@@ -63,6 +63,7 @@ allprojects {
         mavenCentral()
         maven("https://oss.sonatype.org/content/repositories/snapshots") {
             mavenContent {
+                includeGroup("com.github.bjoernpetersen")
                 snapshotsOnly()
             }
         }
