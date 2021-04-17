@@ -214,7 +214,7 @@ private class Playbacks @Inject private constructor() {
             "avi" -> aviPlayback
             "mkv" -> mkvPlayback
             "mp4" -> mp4Playback
-            else -> throw IllegalArgumentException()
+            else -> throw IllegalArgumentException("Unsupported file extension $extension")
         }
     }
 }

@@ -128,6 +128,7 @@ class FolderSuggester : Suggester {
             .filter { Files.isRegularFile(it) }
             .mapNotNull {
                 runBlocking {
+                    @Suppress("SwallowedException")
                     try {
                         provider.lookup(it.toId())
                     } catch (e: NoSuchSongException) {

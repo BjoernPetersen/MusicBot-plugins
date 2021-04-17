@@ -65,7 +65,7 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
                 userId = try {
                     loadUserId()
                 } catch (e: InitializationException) {
-                    logger.info("user ID could not be found.")
+                    logger.info(e) { "user ID could not be found." }
                     return@withContext null
                 }
                 this@PlaylistSuggester.userId.set(userId)

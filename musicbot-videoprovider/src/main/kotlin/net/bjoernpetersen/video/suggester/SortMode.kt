@@ -25,7 +25,7 @@ enum class SortMode(
             return try {
                 valueOf(string)
             } catch (e: IllegalArgumentException) {
-                throw DeserializationException()
+                throw DeserializationException(e)
             }
         }
     }

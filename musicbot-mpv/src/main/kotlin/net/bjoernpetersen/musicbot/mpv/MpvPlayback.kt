@@ -13,7 +13,6 @@ import net.bjoernpetersen.musicbot.mpv.control.Pipe
 import net.bjoernpetersen.musicbot.mpv.control.UnixPipe
 import net.bjoernpetersen.musicbot.spi.plugin.AbstractPlayback
 import net.bjoernpetersen.musicbot.spi.plugin.PlaybackState
-import java.io.File
 import java.io.IOException
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -23,14 +22,13 @@ import java.util.UUID
 private const val EXECUTABLE = "mpv"
 
 internal class MpvPlayback(
-    dir: File,
     private val path: String,
     private val options: CliOptions
 ) : AbstractPlayback() {
 
     private val logger = KotlinLogging.logger { }
 
-    private val pipePath = createPipePath(dir.toPath())
+    private val pipePath = createPipePath()
     private val mpv: Process = ProcessBuilder(createCommand()).start()
     private var pipe: Pipe? = null
     private var api: MpvApi? = null
@@ -128,7 +126,7 @@ internal class MpvPlayback(
         const val LOAD_TIME_MILLIS: Long = 2000
         const val EXIT_TIMEOUT_MILLIS: Long = 5000
         val isWin = System.getProperty("os.name").toLowerCase().startsWith("win")
-        fun createPipePath(baseDir: Path): Path {
+        fun createPipePath(): Path {
             val uuid = UUID.randomUUID().toString()
             return if (isWin) {
                 Paths.get("""\\.\pipe\$uuid""")

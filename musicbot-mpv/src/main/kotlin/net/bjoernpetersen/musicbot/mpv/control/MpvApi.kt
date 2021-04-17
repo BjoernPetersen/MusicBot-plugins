@@ -50,6 +50,7 @@ class MpvApi(
                     delay(WAIT_ON_NULL_LINE_MILLIS)
                     continue
                 }
+                @Suppress("SwallowedException")
                 try {
                     val response = commandResponseAdapter.fromJson(line) ?: continue
                     val requestId = response.requestId

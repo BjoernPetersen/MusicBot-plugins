@@ -92,7 +92,7 @@ class Mp3ProviderImpl : Mp3Provider, AlbumArtSupplier, CoroutineScope {
     }
 
     override fun getDirectory(): Path {
-        return config.folder.get() ?: throw IllegalStateException()
+        return config.folder.get() ?: throw IllegalStateException("Folder not set")
     }
 
     private suspend fun initializeSongs(

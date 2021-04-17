@@ -129,6 +129,7 @@ class PlaylistMp3Suggester : Suggester, CoroutineScope by PluginScope() {
 
         entries.forEach { entry ->
             val id = entry.toId()
+            @Suppress("SwallowedException")
             try {
                 val song = provider.lookup(id)
                 songs.add(song)

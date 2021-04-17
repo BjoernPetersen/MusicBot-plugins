@@ -48,6 +48,7 @@ class SpotifyVolumeHandler : VolumeHandler, CoroutineScope {
                     ?.find { control.deviceId == it.id }
                     ?.volume_percent
             } catch (e: IOException) {
+                logger.trace(e) {}
                 null
             } catch (e: SpotifyWebApiException) {
                 logger.debug(e) {}

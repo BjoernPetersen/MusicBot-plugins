@@ -30,7 +30,7 @@ class SpotifyControlImpl : SpotifyControl, CoroutineScope {
     private lateinit var device: Config.SerializedEntry<SimpleDevice>
 
     override val deviceId: String
-        get() = device.get()?.id ?: throw IllegalStateException()
+        get() = device.get()?.id ?: throw IllegalStateException("deviceId not set")
 
     private val job = Job()
     override val coroutineContext: CoroutineContext

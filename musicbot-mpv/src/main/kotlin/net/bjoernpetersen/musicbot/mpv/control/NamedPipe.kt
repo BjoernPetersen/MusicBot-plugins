@@ -88,7 +88,7 @@ private class RandomAccessReader(
         if (result.isError) {
             result.throwException()
             // Previous statement should not return
-            throw IllegalStateException()
+            throw IllegalStateException("This should be literally impossible to happen")
         } else {
             transferChars()
             if (result.isUnderflow) {

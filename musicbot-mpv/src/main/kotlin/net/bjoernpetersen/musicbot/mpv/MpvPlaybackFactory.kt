@@ -94,7 +94,6 @@ class MpvPlaybackFactory :
         return withContext(coroutineContext) {
             if (!inputFile.isFile) throw IOException("File not found: ${inputFile.path}")
             MpvPlayback(
-                cmdFileDir,
                 inputFile.canonicalPath,
                 config
             )
@@ -106,7 +105,6 @@ class MpvPlaybackFactory :
         logger.debug { "Creating playback for $videoId" }
         return withContext(coroutineContext) {
             MpvPlayback(
-                cmdFileDir,
                 "ytdl://$videoId",
                 config
             )
@@ -117,7 +115,6 @@ class MpvPlaybackFactory :
         logger.debug { "Creating playback for URL $streamLocation" }
         return withContext(coroutineContext) {
             MpvPlayback(
-                cmdFileDir,
                 streamLocation.toExternalForm(),
                 config
             )

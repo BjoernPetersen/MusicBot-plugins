@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "1.4.32"
     id("com.github.ben-manes.versions") version "0.38.0"
     id("com.diffplug.spotless") version "5.12.1"
-    id("io.gitlab.arturbosch.detekt") version "1.14.2"
+    id("io.gitlab.arturbosch.detekt") version "1.16.0"
     id("com.github.johnrengelman.shadow") version "6.1.0"
     idea
 }
