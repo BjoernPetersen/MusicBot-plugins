@@ -73,7 +73,7 @@ class YouTubePlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispat
             progressFeedback.state("Loading playlist info")
             val playlistResponse = api.Playlists().list(PLAYLIST_PARTS).apply {
                 key = auth.getToken()
-                id = playlistId
+                id = listOf(playlistId)
                 maxResults = 1
             }.execute()
 
@@ -130,8 +130,8 @@ class YouTubePlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispat
     }
 
     private companion object {
-        const val PLAYLIST_PARTS = "snippet,contentDetails"
-        const val ITEM_PARTS = "id,contentDetails"
+        val PLAYLIST_PARTS = listOf("snippet", "contentDetails")
+        val ITEM_PARTS = listOf("id", "contentDetails")
         const val PLAYLIST_LIST_MAX_RESULTS = 50L
     }
 }

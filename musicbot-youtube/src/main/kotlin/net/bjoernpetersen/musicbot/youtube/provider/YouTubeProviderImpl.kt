@@ -29,7 +29,6 @@ import net.bjoernpetersen.musicbot.spi.plugin.predefined.youtube.YouTubeProvider
 import net.bjoernpetersen.musicbot.youtube.cache.AsyncLoader
 import java.io.IOException
 import java.time.Duration
-import java.util.ArrayList
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.max
@@ -109,7 +108,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
                             BATCH_LOOKUP_MAX
                         )
                     ) {
-                        val idsString = partition.joinToString(",") { pair -> pair.value }
+                        val idsString = partition.map { pair -> pair.value }
 
                         val videos: List<Video> = api.videos().list(VIDEO_RESULT_PARTS)
                             .setKey(auth.getToken())
@@ -218,7 +217,7 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
             withContext(coroutineContext) {
                 api.videos().list(VIDEO_RESULT_PARTS)
                     .setKey(auth.getToken())
-                    .setId(id)
+                    .setId(listOf(id))
                     .execute()
                     .items
             }
@@ -252,9 +251,9 @@ class YouTubeProviderImpl : YouTubeProvider, CoroutineScope by PluginScope(Dispa
     }
 
     private companion object {
-        const val SEARCH_RESULT_PARTS = "id"
-        const val VIDEO_RESULT_PARTS = "id,snippet,contentDetails"
-        const val SEARCH_TYPE = "video"
+        val SEARCH_RESULT_PARTS = listOf("id")
+        val VIDEO_RESULT_PARTS = listOf("id", "snippet", "contentDetails")
+        val SEARCH_TYPE = listOf("video")
 
         const val BATCH_LOOKUP_MAX = 50
     }

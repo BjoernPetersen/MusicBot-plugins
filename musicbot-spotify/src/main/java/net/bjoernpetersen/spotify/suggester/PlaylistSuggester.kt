@@ -2,6 +2,7 @@ package net.bjoernpetersen.spotify.suggester
 
 import com.wrapper.spotify.SpotifyApi
 import com.wrapper.spotify.exceptions.SpotifyWebApiException
+import com.wrapper.spotify.model_objects.specification.Track
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -41,6 +42,7 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
 
     @Inject
     private lateinit var auth: SpotifyAuthenticator
+
     @Inject
     private lateinit var provider: SpotifyProvider
 
@@ -197,7 +199,7 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
     private suspend fun loadPlaylist(playlistId: String, offset: Int = 0): List<Song> {
         val playlistTracks = try {
             getApi()
-                .getPlaylistsTracks(playlistId)
+                .getPlaylistsItems(playlistId)
                 .marketFromToken()
                 .offset(offset)
                 .build()
@@ -210,8 +212,9 @@ class PlaylistSuggester : Suggester, CoroutineScope by PluginScope(Dispatchers.I
 
         val ids = playlistTracks.items
             .asSequence()
-            .map { it.track }
-            .filter { it?.isPlayable ?: false }
+            .map { it.track as? Track }
+            .filterNotNull()
+            .filter { it.isPlayable ?: false }
             .map { it.id }
             .toList()
 
