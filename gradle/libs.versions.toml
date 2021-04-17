@@ -1,0 +1,111 @@
+[versions]
+musicbot = "0.26.0-SNAPSHOT"
+m3uparser = "1.1.0"
+ktor.strictly = "[1.4, 1.5)"
+junit.strictly = "[5.7, 5.8)"
+moshi = "1.9.2"
+
+# Plugins
+ktlint = "0.39.0"
+jacoco = "0.8.6"
+
+
+[libraries]
+
+[libraries.musicbot]
+group = "com.github.bjoernpetersen"
+name = "musicbot"
+version.ref = "musicbot"
+
+[libraries.coroutines-jdk8]
+group = "org.jetbrains.kotlinx"
+name = "kotlinx-coroutines-jdk8"
+version.require = "1.4"
+
+[libraries.gplaymusic]
+group = "com.github.felixgail"
+name = "gplaymusic"
+version = "0.3.8"
+
+[libraries.m3uparser]
+group = "com.github.bjoernpetersen"
+name = "m3u-parser"
+version.ref = "m3uparser"
+
+[libraries.id3tag]
+group = "com.mpatric"
+name = "mp3agic"
+version = "0.9.1"
+
+[libraries.fuzzywuzzy]
+group = "me.xdrop"
+name = "fuzzywuzzy"
+version = "1.2.0"
+
+
+[libraries.moshi-core]
+group = "com.squareup.moshi"
+name = "moshi-kotlin"
+version.ref = "moshi"
+
+[libraries.moshi-codegen]
+group = "com.squareup.moshi"
+name = "moshi-kotlin-codegen"
+version.ref = "moshi"
+
+
+[libraries.unixsocket]
+group = "com.kohlschutter.junixsocket"
+name = "junixsocket-core"
+version = "2.3.2"
+
+[libraries.nuprocess]
+group = "com.zaxxer"
+name = "nuprocess"
+version = "1.2.6"
+
+[libraries.spotify]
+group = "se.michaelthelin.spotify"
+name = "spotify-web-api-java"
+version = "4.2.1"
+
+[libraries.ktor-client]
+group = "io.ktor"
+name = "ktor-client-okhttp"
+version.strictly = "1.4.1"
+
+[libraries.volctl]
+group = "com.github.bjoernpetersen"
+name = "volctl"
+version = "3.0.0"
+
+[libraries.youtube]
+group = "com.google.apis"
+name = "google-api-services-youtube"
+version = "v3-rev20200109-1.30.8"
+
+[libraries.caffeine]
+group = "com.github.ben-manes.caffeine"
+name = "caffeine"
+version = "2.8.1"
+
+
+[libraries.sqlite]
+group = "org.xerial"
+name = "sqlite-jdbc"
+version = "3.34.0"
+
+[libraries.slf4j-simple]
+group = "org.slf4j"
+name = "slf4j-simple"
+version = "1.8.0-beta4"
+
+[libraries.junit-api]
+group = "org.junit.jupiter"
+name = "junit-jupiter-api"
+version.ref = "junit"
+
+[libraries.junit-engine]
+group = "org.junit.jupiter"
+name = "junit-jupiter-engine"
+version.ref = "junit"

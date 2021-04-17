@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     kotlin("jvm")
-    id("com.github.johnrengelman.shadow") version Plugin.SHADOW_JAR
+    id("com.github.johnrengelman.shadow")
 }
 
 version = "0.5.0"
@@ -18,33 +18,14 @@ tasks {
 }
 
 dependencies {
-    compileOnly(
-        group = "com.github.bjoernpetersen",
-        name = "musicbot",
-        version = Lib.MUSICBOT
-    ) {
-        isChanging = Lib.MUSICBOT.contains("SNAPSHOT")
+    compileOnly(libs.musicbot) {
+        isChanging = libs.versions.musicbot.get().contains("SNAPSHOT")
     }
 
-    implementation(
-        group = "com.github.felixgail",
-        name = "gplaymusic",
-        version = Lib.GPLAYMUSIC
-    )
+    implementation(libs.gplaymusic)
 
-    testImplementation(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-api",
-        version = Lib.JUNIT
-    )
-    testRuntimeOnly(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-engine",
-        version = Lib.JUNIT
-    )
-    testRuntimeOnly(
-        group = "org.slf4j",
-        name = "slf4j-simple",
-        version = Lib.SLF4J
-    )
+    testImplementation(libs.musicbot)
+    testImplementation(libs.junit.api)
+    testRuntimeOnly(libs.junit.engine)
+    testRuntimeOnly(libs.slf4j.simple)
 }

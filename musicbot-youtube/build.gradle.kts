@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm")
-    id("com.github.johnrengelman.shadow") version Plugin.SHADOW_JAR
+    id("com.github.johnrengelman.shadow")
 }
 
 version = "0.19.0"
@@ -12,50 +12,22 @@ tasks {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
     google()
 }
 
 dependencies {
-    compileOnly(
-        group = "com.github.bjoernpetersen",
-        name = "musicbot",
-        version = Lib.MUSICBOT
-    ) {
-        isChanging = Lib.MUSICBOT.contains("SNAPSHOT")
+    compileOnly(libs.musicbot) {
+        isChanging = libs.versions.musicbot.get().contains("SNAPSHOT")
     }
 
-    implementation(
-        group = "com.google.apis",
-        name = "google-api-services-youtube",
-        version = Lib.YOUTUBE_API
-    ) {
+    implementation(libs.youtube) {
         exclude("com.google.guava")
     }
-    implementation(
-        group = "com.github.ben-manes.caffeine",
-        name = "caffeine",
-        version = Lib.CAFFEINE
-    )
+    implementation(libs.caffeine)
 
-    testImplementation(
-        group = "com.github.bjoernpetersen",
-        name = "musicbot",
-        version = Lib.MUSICBOT
-    )
-    testImplementation(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-api",
-        version = Lib.JUNIT
-    )
-    testRuntimeOnly(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-engine",
-        version = Lib.JUNIT
-    )
-    testRuntimeOnly(
-        group = "org.slf4j",
-        name = "slf4j-simple",
-        version = Lib.SLF4J
-    )
+    testImplementation(libs.musicbot)
+    testImplementation(libs.junit.api)
+    testRuntimeOnly(libs.junit.engine)
+    testRuntimeOnly(libs.slf4j.simple)
 }

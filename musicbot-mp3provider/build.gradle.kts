@@ -3,7 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     kotlin("jvm")
-    id("com.github.johnrengelman.shadow") version Plugin.SHADOW_JAR
+    id("com.github.johnrengelman.shadow")
 }
 
 version = "0.9.0"
@@ -18,55 +18,23 @@ tasks {
 }
 
 dependencies {
-    compileOnly(
-        group = "com.github.bjoernpetersen",
-        name = "musicbot",
-        version = Lib.MUSICBOT
-    ) {
-        isChanging = Lib.MUSICBOT.contains("SNAPSHOT")
+    compileOnly(libs.musicbot) {
+        isChanging = libs.versions.musicbot.get().contains("SNAPSHOT")
     }
 
-    implementation(
-        group = "com.mpatric",
-        name = "mp3agic",
-        version = Lib.ID3_TAG
-    )
-    implementation(
-        group = "me.xdrop",
-        name = "fuzzywuzzy",
-        version = Lib.FUZZYWUZZY
-    )
+    implementation(libs.id3tag)
+    implementation(libs.fuzzywuzzy)
 
     // Used for PlaylistMp3Suggester
-    implementation(
-        group = "com.github.bjoernpetersen",
-        name = "m3u-parser",
-        version = Lib.M3U_PARSER
-    ) {
-        isChanging = Lib.M3U_PARSER.contains("SNAPSHOT")
+    implementation(libs.m3uparser) {
+        isChanging = libs.versions.m3uparser.get().contains("SNAPSHOT")
         exclude("org.jetbrains.kotlin")
         exclude("org.slf4j")
     }
 
-    testImplementation(
-        group = "com.github.bjoernpetersen",
-        name = "musicbot",
-        version = Lib.MUSICBOT
-    )
-    testImplementation(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-api",
-        version = Lib.JUNIT
-    )
-    testRuntimeOnly(
-        group = "org.junit.jupiter",
-        name = "junit-jupiter-engine",
-        version = Lib.JUNIT
-    )
-    testRuntimeOnly(
-        group = "org.slf4j",
-        name = "slf4j-simple",
-        version = Lib.SLF4J
-    )
-    testRuntimeOnly(group = "org.xerial", name = "sqlite-jdbc", version = Lib.SQLITE)
+    testImplementation(libs.musicbot)
+    testImplementation(libs.junit.api)
+    testRuntimeOnly(libs.junit.engine)
+    testRuntimeOnly(libs.slf4j.simple)
+    testRuntimeOnly(libs.sqlite)
 }
