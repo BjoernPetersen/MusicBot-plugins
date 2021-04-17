@@ -6,7 +6,7 @@ junit.strictly = "[5.7, 5.8)"
 moshi = "1.12.0"
 
 # Plugins
-ktlint = "0.39.0"
+ktlint = "0.41.0"
 jacoco = "0.8.6"
 
 
