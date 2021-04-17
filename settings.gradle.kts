@@ -2,7 +2,6 @@ rootProject.name = "musicbot-plugins"
 enableFeaturePreview("VERSION_CATALOGS")
 include(
     "musicbot-bridge",
-    "musicbot-gplaymusic",
     "musicbot-javafxplayback",
     "musicbot-mp3provider",
     "musicbot-mpv",

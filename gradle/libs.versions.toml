@@ -22,11 +22,6 @@ group = "org.jetbrains.kotlinx"
 name = "kotlinx-coroutines-jdk8"
 version.require = "1.4"
 
-[libraries.gplaymusic]
-group = "com.github.felixgail"
-name = "gplaymusic"
-version = "0.3.8"
-
 [libraries.m3uparser]
 group = "com.github.bjoernpetersen"
 name = "m3u-parser"
